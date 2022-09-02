@@ -1,0 +1,16 @@
+.container {
+  ul {
+    display: flex;
+    padding: 0;
+    list-style: none;
+    flex-direction: row;
+    gap: 10px;
+    a {
+      text-decoration: none;
+      color: black;
+    }
+    a:hover {
+      color: blue;
+    }
+  }
+}
