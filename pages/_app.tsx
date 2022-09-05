@@ -22,6 +22,5 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       
     </Head>
     <Component {...pageProps} />
-    <Footer />
   </div>)
 }

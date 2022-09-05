@@ -34,8 +34,8 @@ export default memo(function Login(): ReactElement {
         <title>登录</title>
       </Head>
       <div className={styles.container}>
+        <h2>登录网上聊天室</h2>
         <form className={styles.form} onSubmit={handleSubmit}>
-          <h2>登录网上聊天室</h2>
           <label>账户：
             <TextField required error={!isFirst && account === ""} helperText="账户名不能为空" name="account" type="text" placeholder="请输入你的账户" autoFocus={true} variant="standard" value={account} onChange={handleInput}></TextField>
           </label>
