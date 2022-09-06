@@ -12,15 +12,9 @@ export default function Home() {
       <Head>
         <title>网上聊天室</title>
       </Head>
-      <nav>
-        <ul>
-          {
-            arr.map((i) => {
-              return <li key={i.to}><Link href={i.to}><a>{i.name}</a></Link></li>
-            })
-          }
-        </ul>
-      </nav>
+      <div>
+        检查登陆中...请不要离开
+      </div>
     </div>
   )
 }

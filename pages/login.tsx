@@ -1,9 +1,11 @@
 import Head from "next/head"
-import { ChangeEvent, ReactElement, useState, memo } from "react"
+import { ReactElement, useState, memo, FormEvent } from "react"
 import styles from '../styles/login.module.scss'
 import { Button, TextField } from "@mui/material"
 import Link from "next/link"
-const CopyRight = memo(function CopyRight():ReactElement {
+import axios, { AxiosError} from 'axios'
+import { useRouter } from "next/router"
+const CopyRight = memo(function CopyRight(): ReactElement {
   return (
     <p>
       Copyright © 李帅的网站
@@ -11,22 +13,67 @@ const CopyRight = memo(function CopyRight():ReactElement {
   )
 })
 export default memo(function Login(): ReactElement {
-  const [account, setAccount] = useState("")
-  const [password, setPassword] = useState("")
-  const [isFirst, setIsFirst] = useState(true)
-  const handleSubmit = async () => {
-    let res = await fetch('http://localhost:9000/login');
-    res.json();
-    // TODO: 待完善
-  }
-  const handleInput = (event: any) => {
-    setIsFirst(false)
-    let name = event.target.getAttribute('name')
-    if (name === 'account') {
-      setAccount(event.target.value)
-    } else if (name === 'password') {
-      setPassword(event.target.value)
+  const [usernameInfo, setUsernameInfo] = useState({
+    username: '',
+    helperText: '',
+    isError: false
+  })
+  const [passwordInfo, setPasswordInfo] = useState({
+    password: '',
+    helperText: '',
+    isError: false
+  })
+  const router = useRouter()
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (usernameInfo.isError || passwordInfo.isError) {
+      return
     }
+    try {
+      let res = await axios('http://localhost:8080/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          username: usernameInfo.username,
+          password: passwordInfo.password
+        }
+      })
+      let data = await res.data;
+      if (data.error_code === '0') {
+        router.push(`/users/${usernameInfo.username}`)
+        document.cookie = `token=${data.access_token}; SameSite=Strict; Max-age=10000000`
+      }
+    } catch (error: any) {
+      if (error instanceof AxiosError) {
+        if (error.status === '401') {
+          setPasswordInfo((prev) => ({ password: prev.password, isError: true, helperText: '用户名或密码错误' }))
+        }
+      }
+    }
+  }
+  const handleUsername = (event: any) => {
+    let newV = event.target.value.trim()
+    let helperText = ""
+    let isError = false
+    if (newV.length < 3 || newV.length > 18) {
+      helperText = "用户名的长度应为3到18"
+      isError = true
+      setUsernameInfo({ username: newV, isError, helperText })
+    } else {
+      setUsernameInfo({ username: newV, isError, helperText })
+    }
+  }
+  const handlePassword = (event: any) => {
+    let newV = event.target.value.trim()
+    let isError = false
+    let helperText = ''
+    if (newV.length < 8 || newV.length > 20) {
+      isError = true
+      helperText = '密码的长度为8到20'
+    }
+    setPasswordInfo({ isError, password: newV, helperText })
   }
   return (
     <div className={styles.Login}>
@@ -36,16 +83,16 @@ export default memo(function Login(): ReactElement {
       <div className={styles.container}>
         <h2>登录网上聊天室</h2>
         <form className={styles.form} onSubmit={handleSubmit}>
-          <label>账户：
-            <TextField required error={!isFirst && account === ""} helperText="账户名不能为空" name="account" type="text" placeholder="请输入你的账户" autoFocus={true} variant="standard" value={account} onChange={handleInput}></TextField>
+          <span>用户名：</span>
+          <label>
+            <TextField required error={usernameInfo.isError} helperText={usernameInfo.helperText} name="account" type="text" placeholder="请输入你的账户" autoFocus={true} variant="standard" value={usernameInfo.username} onChange={handleUsername}></TextField>
           </label>
-          <label>密码：
-            <TextField required error={!isFirst && password.length < 6 || password.length > 16} name="password" type="password" placeholder="请输入你的密码" variant="standard" helperText="密码长度在8-16位" value={password} onChange={handleInput}></TextField>
+          <span>密 码：</span>
+          <label>
+            <TextField required error={passwordInfo.isError} name="password" type="password" placeholder="请输入你的密码" variant="standard" helperText={passwordInfo.helperText} value={passwordInfo.password} onChange={handlePassword}></TextField>
           </label>
-          <div className={styles.buttons}>
-            <Button variant="outlined" type="submit">登录</Button>
-            <Button variant="outlined" type="button"><Link href="/register">注册</Link></Button>
-          </div>
+          <Button variant="contained" type="submit">登录</Button>
+          <Button variant="contained" type="button"><Link href="/register">注册</Link></Button>
         </form>
         <CopyRight />
       </div>

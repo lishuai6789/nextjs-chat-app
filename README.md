@@ -1,1 +1,5 @@
-This is a starter template for [Learn Next.js](https://nextjs.org/learn).
+# 网上聊天室
+### 安全方面
+1. 使用samesite cookie，防止CSRF攻击
+### 项目的已知问题
+1. 用户的个人信息页可以被直接访问到，因为是前后端分离，没有办法做到所有的页面都需要确权；
