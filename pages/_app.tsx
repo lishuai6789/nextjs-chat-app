@@ -8,18 +8,11 @@ import '../styles/app.scss'
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter()
   useEffect(() => {
-    axios('http://localhost:8080/auth/tokenLogin', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${getCookie('token')}`
-      }
-    })
-    .then((res: AxiosResponse) => {
-      router.push(`/users/${res.data.username}`)
-    })
-    .catch(() => {
-      // router.push("/login")
-    })
+    // Bmob.User.login('lishuai', 'qq1735612628')
+    // .then((res) => console.log(res))
+    // .catch((err) => {
+    //   router.push("/login")
+    // })
   }, [])
   return (<div>
     <Head>
