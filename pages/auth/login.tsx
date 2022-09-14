@@ -1,14 +1,11 @@
-import Head from "next/head"
-import { ReactElement, useState, memo, FormEvent } from "react"
-import styles from '../../styles/login.module.scss'
-import { Button, TextField, Alert, FormControlLabel, Checkbox, CircularProgress } from "@mui/material"
-import Link from "next/link"
+import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
 import { AxiosError, AxiosResponse } from 'axios'
-import AxiosInstance from "../../utils/aixos/axios"
+import Head from "next/head"
+import Link from "next/link"
 import { useRouter } from "next/router"
-import { setCookie } from "cookies-next"
-import { AES } from "crypto-js"
-import { AES_KEY, SERVER_URL } from "../../constant/constant"
+import { FormEvent, memo, ReactElement, useState } from "react"
+import styles from '../../styles/login.module.scss'
+import AxiosInstance from "../../utils/aixos/axios"
 import { AESEncrypt } from "../../utils/crpto/crypto"
 const CopyRight = memo(function CopyRight(): ReactElement {
   return (
@@ -35,6 +32,7 @@ export default memo(function Login(): ReactElement {
   const [loading, setLoading] = useState(false)
   const [remeberMe, setRemeberMe] = useState(true);
   const router = useRouter()
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
     if (usernameInfo.isError || passwordInfo.isError || loading) {
@@ -71,14 +69,8 @@ export default memo(function Login(): ReactElement {
               "tag"?: object | null
             }
             let t: saRet = data.data
-            console.log("satoken", t.tokenValue)
-            console.log("加密之后", AESEncrypt(t.tokenValue));
             localStorage.setItem("satoken", AESEncrypt(t.tokenValue));
-            // setCookie("satoken", AES.encrypt(t.tokenValue, AES_KEY).toString(), {
-            //   maxAge: t.tokenTimeout,
-            //   sameSite: 'lax',
-            // })
-            // router.push(`/users/${usernameInfo.username}`)
+            router.push('/')
           }
         }
       })
