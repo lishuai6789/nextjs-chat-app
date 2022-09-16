@@ -6,6 +6,10 @@
   background-color: bisque;
 }
 
+.avatar {
+  display: inline-block;
+}
+
 .side {
   flex: 1 0 300px;
   padding: 20px;
@@ -35,11 +39,6 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-
-    h3 {
-      margin: 0;
-      font-weight: 500;
-    }
 
     p {
       margin: 0;

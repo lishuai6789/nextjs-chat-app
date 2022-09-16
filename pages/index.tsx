@@ -1,37 +1,73 @@
 import Head from "next/head"
-import Link from "next/link"
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
-import { createContext, FormEvent, memo, useEffect, useState } from 'react'
-import { Button, ButtonGroup, IconButton, TextField } from '@mui/material'
+import { Context, createContext, FormEvent, memo, useContext, useEffect, useState, useLayoutEffect } from 'react'
 import Vercel from '../public/vercel.svg'
-import Image from 'next/image'
+import { Button, ButtonGroup, IconButton, TextField, Typography, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
 import AxiosInstance from "../utils/aixos/axios";
 import styles from '../styles/index.module.scss'
 import { AxiosError, AxiosResponse } from "axios";
-interface UserInfo {
-  imgSrc?: string,
-  username?: string,
-  signature?: string
-}
-const UserInfo = memo(function UserInfo(props: UserInfo) {
+import Image from 'next/image'
+import { RootState, store } from '../components/index/store'
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { updateUsername } from "../components/index/userSlice";
+import { openProfile, closeProfile } from "../components/index/uiSlice";
+const FormDialog = memo(function FormDialog()  {
+  const toggle: boolean = useSelector((state: RootState) => state.ui.toggleProfile)
+  const dispatch = useDispatch()
+  const handleSubmit = () => {
+
+  }
+  const handleCloseProfile = () => {
+    dispatch(closeProfile())
+  }
+  const username: string = useSelector((state: RootState) => state.user.username)
+  return (
+    <Dialog open={toggle} onClick={handleCloseProfile}>
+      <DialogTitle>修改用户信息</DialogTitle>
+      <DialogContent>
+
+      </DialogContent>
+      <DialogActions>
+        <Button variant="contained" onClick={handleCloseProfile}>取消</Button>
+        <Button variant="contained" onClick={handleSubmit}>提交</Button>
+      </DialogActions>
+    </Dialog>
+  )
+})
+const UserInfo = memo(function UserInfo(props: any) {
+  const toggle: boolean = useSelector((state: RootState) => state.ui.toggleProfile)
+  const dispatch = useDispatch()
+  const handleOpenProfile = () => {
+    dispatch(openProfile())
+  }
+  const username: string = useSelector((state: RootState) => state.user.username)
   return (
     <div className={styles.UserInfo}>
       <div className={styles.avatarWrapper}>
-        <Image src={Vercel} width={50} height={50} alt="avatar" />
+        <Tooltip title="点击修改用户信息">
+          <span>
+            <Button variant="text" onClick={handleOpenProfile} disabled={toggle} >
+              <Image className={styles.avatar} src={Vercel} alt="" width={50} height={50} />
+            </Button>
+          </span>
+        </Tooltip>
       </div>
       <div className={styles.userWrapper}>
-        <h3>{props.username}</h3>
-        <p>{props.signature}</p>
+        <Typography variant="h6">
+          {username}
+        </Typography>
+        <p>fjwfiwwerwrww</p>
       </div>
+      <FormDialog />
     </div>
   )
 })
 const SearchBar = memo(function SearchBar() {
   const [search, setSearch] = useState("")
   const handleSubmit = (event: FormEvent) => {
-
+    event.preventDefault()
   }
   const handleChange = (event: any) => {
     setSearch(event.target.value)
@@ -64,7 +100,7 @@ const MainHeader = memo(function MainHeader() {
   return (
     <div className={styles.MainHeader}>
       <div>
-        <UserInfo />
+        {/* <UserInfo /> */}
       </div>
       <div>
 
@@ -96,38 +132,44 @@ const InputChat = memo(function InputChat() {
     </div>
   )
 })
-const UserContext = createContext({username: ''})
-export default function Home() {
-  const [userInfo, setUserInfo] = useState({ username: '' })
-  useEffect(() => {
+
+function Home() {
+  const username = useSelector((state: RootState) => state.user.username)
+  const dispatch = useDispatch();
+  useLayoutEffect(() => {
     AxiosInstance.get('/auth/getUsername')
-    .then((res: AxiosResponse) => {
-      setUserInfo({ username: res.data.data })
-    })
-    .catch((err: any) => {
-      if (err instanceof AxiosError) {
-        
-      }
-    })
+      .then((res: AxiosResponse) => {
+        dispatch(updateUsername(res.data.data))
+      })
+      .catch((err: any) => {
+        if (err instanceof AxiosError) {
+
+        }
+      })
   }, [])
   return (
     <div className={styles.container}>
-      <UserContext.Provider value={userInfo}>
-        <Head>
-          <title>{userInfo.username === '' ? '正在加载中' : userInfo.username}</title>
-        </Head>
-        <aside className={styles.side}>
-          <UserInfo imgSrc='../../public/vercel.svg' username='test' signature='这是一段话qdqdqdqqdqfafwfd' />
-          <SearchBar />
-          <FriendList />
-          <Bottom />
-        </aside>
-        <main className={styles.main}>
-          <MainHeader />
-          <ChatArea />
-          <InputChat />
-        </main>
-      </UserContext.Provider>
+      <Head>
+        <title>{username === '' ? '正在加载中' : username}</title>
+      </Head>
+      <aside className={styles.side}>
+        <UserInfo signature='这是一段话qdqdqdqqdqfafwfdggggggggggggdt' />
+        <SearchBar />
+        <FriendList />
+        <Bottom />
+      </aside>
+      <main className={styles.main}>
+        <MainHeader />
+        <ChatArea />
+        <InputChat />
+      </main>
     </div>
+  )
+}
+export default function HomeWrapper() {
+  return (
+    <Provider store={store}>
+      <Home />
+    </Provider>
   )
 }
