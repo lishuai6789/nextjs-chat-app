@@ -15,6 +15,7 @@ import { updateUsername } from "../components/index/userSlice";
 import { openProfile, closeProfile } from "../components/index/uiSlice";
 import dynamic from "next/dynamic";
 const FormDialog = dynamic(() => import('../components/index/FomDialog'))
+
 const UserInfo = memo(function UserInfo(props: any) {
   const toggle: boolean = useSelector((state: RootState) => state.ui.toggleProfile)
   const dispatch = useDispatch()
@@ -47,6 +48,7 @@ const UserInfo = memo(function UserInfo(props: any) {
     </div>
   )
 })
+
 const SearchBar = memo(function SearchBar() {
   const [search, setSearch] = useState("")
   const handleSubmit = (event: FormEvent) => {
