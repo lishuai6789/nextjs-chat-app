@@ -1,4 +1,4 @@
-import { ReactElement, memo, useState, FormEvent, useRef, useCallback } from "react";
+import { ReactElement, memo, useState, FormEvent, useRef, useCallback, ChangeEvent } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { TextField, Button, Alert } from "@mui/material";
@@ -30,12 +30,14 @@ const Register = memo(function RegisterMemo(): ReactElement {
   })
   const [isRegister, setIsRegister] = useState(false) //????
   const router = useRouter()
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (usernameInfo.isError || passwordInfo.isError || retypeInfo.isError) {
       return
     }
+    // TODO: 等待完善
   }
+  // TODO: 等待完善
   const checkDuplicate = useCallback(_.debounce(async (username: string) => {
     try {
       let res = await fetch(`http://localhost:8080/auth/check?username=${username}`, {
@@ -57,7 +59,7 @@ const Register = memo(function RegisterMemo(): ReactElement {
       console.log(error)
     }
   }, 1000), [])
-  const handleUsername = (event: any) => {
+  const handleUsername = (event: ChangeEvent<HTMLInputElement>) => {
     let newV = event.target.value.trim()
     let helperText = ""
     let isError = false
@@ -70,7 +72,7 @@ const Register = memo(function RegisterMemo(): ReactElement {
       // checkDuplicate(newV) // 事件驱动变化，并未使用useEffect
     }
   }
-  const handlePassword = (event: any) => {
+  const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
     let newV = event.target.value.trim()
     let isError = false
     let helperText = ''
@@ -80,7 +82,7 @@ const Register = memo(function RegisterMemo(): ReactElement {
     }
     setPasswordInfo({ isError, password: newV, helperText })
   }
-  const handleRetype = (event: any) => {
+  const handleRetype = (event: ChangeEvent<HTMLInputElement>) => {
     let newV = event.target.value.trim()
     let helperText = ''
     let isError = false

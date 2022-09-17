@@ -3,7 +3,7 @@ import { AxiosError, AxiosResponse } from 'axios'
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { FormEvent, memo, ReactElement, useState } from "react"
+import { ChangeEvent, FormEvent, memo, ReactElement, useState } from "react"
 import styles from '../../styles/login.module.scss'
 import AxiosInstance from "../../utils/aixos/axios"
 import { AESEncrypt } from "../../utils/crpto/crypto"
@@ -33,7 +33,7 @@ export default memo(function Login(): ReactElement {
   const [remeberMe, setRemeberMe] = useState(true);
   const router = useRouter()
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (usernameInfo.isError || passwordInfo.isError || loading) {
       return
@@ -88,7 +88,7 @@ export default memo(function Login(): ReactElement {
         }
       })
   }
-  const handleUsername = (event: any) => {
+  const handleUsername = (event: ChangeEvent<HTMLInputElement>) => {
     let newV = event.target.value.trim()
     let helperText = ""
     let isError = false
@@ -100,7 +100,7 @@ export default memo(function Login(): ReactElement {
       setUsernameInfo({ username: newV, isError, helperText })
     }
   }
-  const handlePassword = (event: any) => {
+  const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
     let newV = event.target.value.trim()
     let isError = false
     let helperText = ''
