@@ -2,7 +2,7 @@ import Head from "next/head"
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
-import { Context, createContext, FormEvent, memo, useContext, useEffect, useState, useLayoutEffect, Suspense } from 'react'
+import React, { Context, createContext, FormEvent, memo, useContext, useEffect, useState, useLayoutEffect, Suspense, ReactElement } from 'react'
 import Vercel from '../public/vercel.svg'
 import { Button, ButtonGroup, IconButton, TextField, Typography, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, } from '@mui/material'
 import AxiosInstance from "../utils/aixos/axios";
@@ -16,7 +16,7 @@ import { openProfile, closeProfile } from "../components/index/uiSlice";
 import dynamic from "next/dynamic";
 const FormDialog = dynamic(() => import('../components/index/FomDialog'))
 
-const UserInfo = memo(function UserInfo(props: any) {
+const UserInfo = memo(function UserInfo(props: any): ReactElement {
   const toggle: boolean = useSelector((state: RootState) => state.ui.toggleProfile)
   const dispatch = useDispatch()
   const handleOpenProfile = () => {
@@ -49,7 +49,7 @@ const UserInfo = memo(function UserInfo(props: any) {
   )
 })
 
-const SearchBar = memo(function SearchBar() {
+const SearchBar = memo(function SearchBar(): ReactElement {
   const [search, setSearch] = useState("")
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -66,14 +66,14 @@ const SearchBar = memo(function SearchBar() {
     </div>
   )
 })
-const FriendList = memo(function FriendList() {
+const FriendList = memo(function FriendList(): ReactElement {
   return (
     <div className={styles.FriendList}>
 
     </div>
   )
 })
-const Bottom = memo(function Bottom() {
+const Bottom = memo(function Bottom():ReactElement {
   return (
     <div className={styles.Bottom}>
       <Button variant='contained'>词云</Button>
@@ -81,7 +81,7 @@ const Bottom = memo(function Bottom() {
     </div>
   )
 })
-const MainHeader = memo(function MainHeader() {
+const MainHeader = memo(function MainHeader():ReactElement {
   return (
     <div className={styles.MainHeader}>
       <div>
@@ -93,14 +93,14 @@ const MainHeader = memo(function MainHeader() {
     </div>
   )
 })
-const ChatArea = memo(function ChatArea() {
+const ChatArea = memo(function ChatArea():ReactElement {
   return (
     <div className={styles.ChatArea}>
 
     </div>
   )
 })
-const InputChat = memo(function InputChat() {
+const InputChat = memo(function InputChat():ReactElement {
   return (
     <div className={styles.InputChat}>
       <div className={styles.menu}>
@@ -118,7 +118,7 @@ const InputChat = memo(function InputChat() {
   )
 })
 
-function Home() {
+function Home():ReactElement {
   const username = useSelector((state: RootState) => state.user.username)
   const dispatch = useDispatch();
   useLayoutEffect(() => {
