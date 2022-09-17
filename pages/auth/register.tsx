@@ -7,6 +7,7 @@ import _ from 'lodash'
 import axios, { AxiosError } from 'axios'
 import { useRouter } from "next/router";
 import { setCookie } from "cookies-next";
+// FIXME: 待完善
 const Register = memo(function RegisterMemo(): ReactElement {
   const [usernameInfo, setUsernameInfo] = useState({
     username: '',

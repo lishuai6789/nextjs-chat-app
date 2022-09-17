@@ -121,14 +121,8 @@ export default memo(function Login(): ReactElement {
       <div className={styles.container}>
         <h2>登录网上聊天室</h2>
         <form className={styles.form} onSubmit={handleSubmit}>
-          <span>用户名：</span>
-          <label>
-            <TextField required error={usernameInfo.isError} helperText={usernameInfo.helperText} name="account" type="text" placeholder="请输入你的账户" autoFocus={true} variant="standard" value={usernameInfo.username} onChange={handleUsername}></TextField>
-          </label>
-          <span>密 码：</span>
-          <label>
-            <TextField required error={passwordInfo.isError} name="password" type="password" placeholder="请输入你的密码" variant="standard" helperText={passwordInfo.helperText} value={passwordInfo.password} onChange={handlePassword}></TextField>
-          </label>
+          <TextField required error={usernameInfo.isError} helperText={usernameInfo.helperText} name="account" type="text" placeholder="请输入你的账户" autoFocus={true} variant="standard" value={usernameInfo.username} onChange={handleUsername} label="账户名"></TextField>
+          <TextField required error={passwordInfo.isError} name="password" type="password" placeholder="请输入你的密码" variant="standard" helperText={passwordInfo.helperText} value={passwordInfo.password} onChange={handlePassword} label="密码"></TextField>
           <FormControlLabel value={remeberMe} onChange={handleRemeberMe} control={<Checkbox defaultChecked name="remeberMe" />} label="记住我"></FormControlLabel>
           <br />
           <Button variant="contained" type="submit" disabled={loading}>{loading ? '登陆中' : '登录'}</Button>

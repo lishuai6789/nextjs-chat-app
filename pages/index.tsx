@@ -2,9 +2,9 @@ import Head from "next/head"
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
-import { Context, createContext, FormEvent, memo, useContext, useEffect, useState, useLayoutEffect } from 'react'
+import { Context, createContext, FormEvent, memo, useContext, useEffect, useState, useLayoutEffect, Suspense } from 'react'
 import Vercel from '../public/vercel.svg'
-import { Button, ButtonGroup, IconButton, TextField, Typography, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { Button, ButtonGroup, IconButton, TextField, Typography, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, } from '@mui/material'
 import AxiosInstance from "../utils/aixos/axios";
 import styles from '../styles/index.module.scss'
 import { AxiosError, AxiosResponse } from "axios";
@@ -13,29 +13,8 @@ import { RootState, store } from '../components/index/store'
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { updateUsername } from "../components/index/userSlice";
 import { openProfile, closeProfile } from "../components/index/uiSlice";
-const FormDialog = memo(function FormDialog()  {
-  const toggle: boolean = useSelector((state: RootState) => state.ui.toggleProfile)
-  const dispatch = useDispatch()
-  const handleSubmit = () => {
-
-  }
-  const handleCloseProfile = () => {
-    dispatch(closeProfile())
-  }
-  const username: string = useSelector((state: RootState) => state.user.username)
-  return (
-    <Dialog open={toggle} onClick={handleCloseProfile}>
-      <DialogTitle>修改用户信息</DialogTitle>
-      <DialogContent>
-
-      </DialogContent>
-      <DialogActions>
-        <Button variant="contained" onClick={handleCloseProfile}>取消</Button>
-        <Button variant="contained" onClick={handleSubmit}>提交</Button>
-      </DialogActions>
-    </Dialog>
-  )
-})
+import dynamic from "next/dynamic";
+const FormDialog = dynamic(() => import('../components/index/FomDialog'))
 const UserInfo = memo(function UserInfo(props: any) {
   const toggle: boolean = useSelector((state: RootState) => state.ui.toggleProfile)
   const dispatch = useDispatch()
@@ -60,7 +39,11 @@ const UserInfo = memo(function UserInfo(props: any) {
         </Typography>
         <p>fjwfiwwerwrww</p>
       </div>
-      <FormDialog />
+      {
+        toggle && <Suspense>
+          <FormDialog />
+        </Suspense>
+      }
     </div>
   )
 })

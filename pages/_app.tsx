@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import '../styles/app.scss'
 import AxiosInstance from '../utils/aixos/axios'
+import 'bootstrap/dist/css/bootstrap.css'
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter()
   const [isPending, setIsPending] = useState(true);
@@ -24,6 +25,9 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         await router.push('/auth/login')
         setIsPending(false)
       })
+    return () => {
+      
+    }
   }, [])
   return (<div>
     <Head>
