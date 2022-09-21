@@ -1,20 +1,23 @@
-import Head from "next/head"
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
-import React, { Context, createContext, FormEvent, memo, useContext, useEffect, useState, useLayoutEffect, Suspense, ReactElement } from 'react'
-import Vercel from '../public/vercel.svg'
-import { Button, ButtonGroup, IconButton, TextField, Typography, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, } from '@mui/material'
-import AxiosInstance from "../utils/aixos/axios";
-import styles from '../styles/index.module.scss'
-import { AxiosError, AxiosResponse } from "axios";
-import Image from 'next/image'
-import { RootState, store } from '../components/index/store'
-import { Provider, useDispatch, useSelector } from "react-redux";
-import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../components/index/userSlice";
-import { openProfile, closeProfile } from "../components/index/uiSlice";
+import { Button, ButtonGroup, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { getCookie } from 'cookies-next';
+import { GetServerSideProps } from 'next';
 import dynamic from "next/dynamic";
-import { GetServerSideProps } from "next";
+import Head from "next/head";
+import Image from 'next/image';
+import { FormEvent, memo, ReactElement, Suspense, useEffect, useState } from 'react';
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { RootState, store } from '../components/index/store';
+import { openProfile } from "../components/index/uiSlice";
+import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../components/index/userSlice";
+import styles from '../styles/index.module.scss';
+import AxiosInstance from "../utils/aixos/axios";
+import { AESDecrypt } from '../utils/crpto/crypto';
+import nookies from 'nookies'
+
 const FormDialog = dynamic(() => import('../components/index/FomDialog'))
 
 const UserInfo = memo(function UserInfo(props: any): ReactElement {
@@ -167,9 +170,15 @@ export default function HomeWrapper() {
     </Provider>
   )
 }
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   context.req.headers
-//   return {
-//     props: {}
-//   }
-// }
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const res = await fetch('http://localhost:8080/', {
+    headers: {
+      satoken: AESDecrypt(nookies.get(context).satoken)
+    }
+  })
+  const data = await res.json();
+  console.log(data)
+  return {
+    props: {}
+  }
+}

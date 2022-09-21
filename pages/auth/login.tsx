@@ -1,5 +1,6 @@
 import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
 import { AxiosError, AxiosResponse } from 'axios'
+import { setCookie } from "cookies-next"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
@@ -70,6 +71,11 @@ export default memo(function Login(): ReactElement {
             }
             let t: saRet = data.data
             localStorage.setItem("satoken", AESEncrypt(t.tokenValue));
+            setCookie('satoken', AESEncrypt(t.tokenValue), {
+              maxAge: t.tokenTimeout,
+              sameSite: 'strict',
+              // httpOnly: true
+            });
             router.push('/')
           }
         }
