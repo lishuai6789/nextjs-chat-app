@@ -3,11 +3,13 @@ export interface UserInterface {
   username: string;
   nickname: string;
   signature: string;
+  avatarUrl: string;
 }
 const initialState: UserInterface = {
   username: '',
   nickname: '',
   signature: '',
+  avatarUrl: '',
 }
 export const userSlice = createSlice({
   name: 'userSlice',
@@ -21,8 +23,11 @@ export const userSlice = createSlice({
     },
     updateSignature: (state: UserInterface, action: PayloadAction<string>) => {
       state.signature = action.payload
+    },
+    updateAvatar: (state: UserInterface, action: PayloadAction<string>):void => {
+      state.avatarUrl = action.payload;
     }
   }
 })
 export default userSlice.reducer;
-export const { updateUsername, updateNickname, updateSignature } = userSlice.actions;
+export const { updateUsername, updateNickname, updateSignature, updateAvatar } = userSlice.actions;

@@ -11,34 +11,39 @@ import { AxiosError, AxiosResponse } from "axios";
 import Image from 'next/image'
 import { RootState, store } from '../components/index/store'
 import { Provider, useDispatch, useSelector } from "react-redux";
-import { updateUsername } from "../components/index/userSlice";
+import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../components/index/userSlice";
 import { openProfile, closeProfile } from "../components/index/uiSlice";
 import dynamic from "next/dynamic";
+import { GetServerSideProps } from "next";
 const FormDialog = dynamic(() => import('../components/index/FomDialog'))
 
 const UserInfo = memo(function UserInfo(props: any): ReactElement {
+  const nickname: string = useSelector((state: RootState) => state.user.nickname)
+  const signature: string = useSelector((state: RootState) => state.user.signature)
+  const avatar: string = useSelector((state: RootState) => state.user.avatarUrl)
   const toggle: boolean = useSelector((state: RootState) => state.ui.toggleProfile)
   const dispatch = useDispatch()
   const handleOpenProfile = () => {
     dispatch(openProfile())
   }
-  const username: string = useSelector((state: RootState) => state.user.username)
   return (
     <div className={styles.UserInfo}>
       <div className={styles.avatarWrapper}>
         <Tooltip title="点击修改用户信息">
           <span>
             <Button variant="text" onClick={handleOpenProfile} disabled={toggle} >
-              <Image className={styles.avatar} src={Vercel} alt="" width={50} height={50} />
+              {
+                avatar !== '' && <Image referrerPolicy="origin" className={styles.avatar} src={avatar} alt="" width={50} height={50} />
+              }
             </Button>
           </span>
         </Tooltip>
       </div>
       <div className={styles.userWrapper}>
         <Typography variant="h6">
-          {username}
+          {nickname}
         </Typography>
-        <p>fjwfiwwerwrww</p>
+        <p>{signature}</p>
       </div>
       {
         toggle && <Suspense>
@@ -73,7 +78,7 @@ const FriendList = memo(function FriendList(): ReactElement {
     </div>
   )
 })
-const Bottom = memo(function Bottom():ReactElement {
+const Bottom = memo(function Bottom(): ReactElement {
   return (
     <div className={styles.Bottom}>
       <Button variant='contained'>词云</Button>
@@ -81,7 +86,7 @@ const Bottom = memo(function Bottom():ReactElement {
     </div>
   )
 })
-const MainHeader = memo(function MainHeader():ReactElement {
+const MainHeader = memo(function MainHeader(): ReactElement {
   return (
     <div className={styles.MainHeader}>
       <div>
@@ -93,14 +98,14 @@ const MainHeader = memo(function MainHeader():ReactElement {
     </div>
   )
 })
-const ChatArea = memo(function ChatArea():ReactElement {
+const ChatArea = memo(function ChatArea(): ReactElement {
   return (
     <div className={styles.ChatArea}>
 
     </div>
   )
 })
-const InputChat = memo(function InputChat():ReactElement {
+const InputChat = memo(function InputChat(): ReactElement {
   return (
     <div className={styles.InputChat}>
       <div className={styles.menu}>
@@ -118,13 +123,17 @@ const InputChat = memo(function InputChat():ReactElement {
   )
 })
 
-function Home():ReactElement {
+function Home(): ReactElement {
   const username = useSelector((state: RootState) => state.user.username)
   const dispatch = useDispatch();
-  useLayoutEffect(() => {
-    AxiosInstance.get('/auth/getUsername')
-      .then((res: AxiosResponse) => {
-        dispatch(updateUsername(res.data.data))
+  useEffect(() => {
+    AxiosInstance.post('/profile/getProfile')
+      .then(async (res: AxiosResponse) => {
+        let data = res.data.data
+        dispatch(updateUsername(data.username))
+        dispatch(updateNickname(data.nickname))
+        dispatch(updateSignature(data.signature))
+        dispatch(updateAvatar(data.avatarPath))
       })
       .catch((err: any) => {
         if (err instanceof AxiosError) {
@@ -158,3 +167,9 @@ export default function HomeWrapper() {
     </Provider>
   )
 }
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   context.req.headers
+//   return {
+//     props: {}
+//   }
+// }
