@@ -2,25 +2,22 @@ import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
 import { Button, ButtonGroup, IconButton, TextField, Tooltip, Typography } from '@mui/material';
-import axios, { AxiosError, AxiosResponse } from "axios";
-import { getCookie } from 'cookies-next';
-import { GetServerSideProps } from 'next';
+import { InferGetServerSidePropsType } from 'next';
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import Image from 'next/image';
-import { FormEvent, memo, ReactElement, Suspense, useEffect, useState } from 'react';
-import { Provider, useDispatch, useSelector } from "react-redux";
-import { RootState, store } from '../components/index/store';
+import nookies from 'nookies';
+import { FormEvent, memo, ReactElement, Suspense, useState } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, wrapper } from '../components/index/store';
 import { openProfile } from "../components/index/uiSlice";
 import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../components/index/userSlice";
 import styles from '../styles/index.module.scss';
-import AxiosInstance from "../utils/aixos/axios";
 import { AESDecrypt } from '../utils/crpto/crypto';
-import nookies from 'nookies'
 
 const FormDialog = dynamic(() => import('../components/index/FomDialog'))
 
-const UserInfo = memo(function UserInfo(props: any): ReactElement {
+const UserInfo = memo(function UserInfo(): ReactElement {
   const nickname: string = useSelector((state: RootState) => state.user.nickname)
   const signature: string = useSelector((state: RootState) => state.user.signature)
   const avatar: string = useSelector((state: RootState) => state.user.avatarUrl)
@@ -126,31 +123,51 @@ const InputChat = memo(function InputChat(): ReactElement {
   )
 })
 
-function Home(): ReactElement {
-  const username = useSelector((state: RootState) => state.user.username)
-  const dispatch = useDispatch();
-  useEffect(() => {
-    AxiosInstance.post('/profile/getProfile')
-      .then(async (res: AxiosResponse) => {
-        let data = res.data.data
-        dispatch(updateUsername(data.username))
-        dispatch(updateNickname(data.nickname))
-        dispatch(updateSignature(data.signature))
-        dispatch(updateAvatar(data.avatarPath))
-      })
-      .catch((err: any) => {
-        if (err instanceof AxiosError) {
 
-        }
-      })
-  }, [])
+export const getServerSideProps = wrapper.getServerSideProps(store => async (context) => {
+  if (!nookies.get(context).satoken) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
+      },
+    }
+  }
+  const res = await fetch('http://localhost:8080/profile/getProfile', {
+    headers: {
+      satoken: AESDecrypt(nookies.get(context).satoken)
+    },
+    method: "POST"
+  })
+  const data = await res.json();
+  if (data.code !== 0) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
+      },
+    }
+  }
+  await store.dispatch(updateNickname(data.data.nickname));
+  await store.dispatch(updateUsername(data.data.username));
+  await store.dispatch(updateAvatar(data.data.avatarPath));
+  await store.dispatch(updateSignature(data.data.signature));
+  return {
+    props: {
+
+    }
+  }
+})
+
+export default function Home(props: InferGetServerSidePropsType<typeof getServerSideProps>): ReactElement {
+  const username = useSelector((state: RootState) => state.user.username)
   return (
     <div className={styles.container}>
       <Head>
         <title>{username === '' ? '正在加载中' : username}</title>
       </Head>
       <aside className={styles.side}>
-        <UserInfo signature='这是一段话qdqdqdqqdqfafwfdggggggggggggdt' />
+        <UserInfo />
         <SearchBar />
         <FriendList />
         <Bottom />
@@ -162,23 +179,4 @@ function Home(): ReactElement {
       </main>
     </div>
   )
-}
-export default function HomeWrapper() {
-  return (
-    <Provider store={store}>
-      <Home />
-    </Provider>
-  )
-}
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const res = await fetch('http://localhost:8080/', {
-    headers: {
-      satoken: AESDecrypt(nookies.get(context).satoken)
-    }
-  })
-  const data = await res.json();
-  console.log(data)
-  return {
-    props: {}
-  }
 }

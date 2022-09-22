@@ -1,15 +1,15 @@
-import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button, Snackbar, Alert } from "@mui/material"
-import LoadingButton from '@mui/lab/LoadingButton';
-import { ChangeEvent, memo, useState, useMemo, useRef, FormEvent, ReactElement, MouseEvent, DragEvent, useId } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { RootState } from "./store"
-import { closeProfile } from "./uiSlice"
-import { client } from "../../utils/alioss/alioss"
 import SendIcon from '@mui/icons-material/Send';
-import styles from '../../styles/FormDialog.module.scss'
-import AxiosInstance from "../../utils/aixos/axios";
-import { AxiosError, AxiosResponse } from "axios";
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import OSS from "ali-oss";
+import { AxiosResponse } from "axios";
+import { ChangeEvent, DragEvent, memo, ReactElement, useMemo, useState } from "react";
 import 'react-photo-view/dist/react-photo-view.css';
+import { useDispatch, useSelector } from "react-redux";
+import styles from '../../styles/FormDialog.module.scss';
+import AxiosInstance from "../../utils/aixos/axios";
+import { RootState } from "./store";
+import { closeProfile } from "./uiSlice";
 import { updateAvatar, updateNickname, updateSignature } from "./userSlice";
 
 const ModifyNickname = memo(function ModifyNickname(): ReactElement {
@@ -180,6 +180,12 @@ const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
       'Cache-Control': 'no-cache'
     }
     let path = `${(new Date()).valueOf()}${files[0].name}`
+    const client = new OSS({
+      accessKeyId: process.env.NEXT_PUBLIC_ACCESS_KEY_ID,
+      accessKeySecret: process.env.NEXT_PUBLIC_ACCESS_KEY_SECRET,
+      bucket: process.env.NEXT_PUBLIC_BUCKET_NAME,
+      region: process.env.NEXT_PUBLIC_REGION
+    })
     const result = await client.put(`img/${path}`, files[0], { headers })
     if (result.res.status === 200) {
       AxiosInstance.post('/profile/updateAvatar', {
@@ -189,7 +195,6 @@ const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
           if (res.data.code === 0) {
             setHelperText({ helperText: '头像上传成功', status: true })
             dispatch(updateAvatar(res.data.data))
-            console.log(res.data.data)
           } else if (res.data.code === 200) {
             setHelperText({ helperText: '头像上传失败', status: true })
           }

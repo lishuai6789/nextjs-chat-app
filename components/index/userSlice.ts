@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { HYDRATE } from 'next-redux-wrapper'
 export interface UserInterface {
   username: string;
   nickname: string;
@@ -12,7 +13,7 @@ const initialState: UserInterface = {
   avatarUrl: '',
 }
 export const userSlice = createSlice({
-  name: 'userSlice',
+  name: 'user',
   initialState,
   reducers: {
     updateUsername: (state: UserInterface, action: PayloadAction<string>) => {
@@ -24,8 +25,16 @@ export const userSlice = createSlice({
     updateSignature: (state: UserInterface, action: PayloadAction<string>) => {
       state.signature = action.payload
     },
-    updateAvatar: (state: UserInterface, action: PayloadAction<string>):void => {
+    updateAvatar: (state: UserInterface, action: PayloadAction<string>): void => {
       state.avatarUrl = action.payload;
+    },
+  },
+  extraReducers: {
+    [HYDRATE]: (state, action) => {
+      state.username = action.payload.user.username
+      state.nickname = action.payload.user.nickname
+      state.avatarUrl = action.payload.user.avatarUrl
+      state.signature = action.payload.user.signature
     }
   }
 })

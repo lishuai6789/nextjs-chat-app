@@ -1,14 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
-
+import {HYDRATE} from 'next-redux-wrapper'
 export interface UiInterface {
   toggleProfile: boolean;
-
 }
 const initialState: UiInterface = {
   toggleProfile: false
 }
 export const uiSlice = createSlice({
-  name: 'uiToggle',
+  name: 'ui',
   initialState,
   reducers: {
     openProfile: (state: UiInterface) => {
@@ -16,6 +15,11 @@ export const uiSlice = createSlice({
     },
     closeProfile: (state: UiInterface) => {
       state.toggleProfile = false
+    }
+  },
+  extraReducers: {
+    [HYDRATE]: (state, action) => {
+      state.toggleProfile = action.payload.ui.toggleProfile
     }
   }
 })

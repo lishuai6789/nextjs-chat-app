@@ -47,7 +47,6 @@ export default memo(function Login(): ReactElement {
     })
       .then(async (res: AxiosResponse) => {
         setLoading(false)
-        console.log(res)
         if (res.status === 500) {
           setLoginError({ isError: true, mes: '服务器发生错误，请稍后重试' })
         } else if (res.status >= 400) {
