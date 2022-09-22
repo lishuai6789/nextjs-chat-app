@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { useRouter } from "next/router";
 import { SERVER_URL } from "../../constant/constant";
 import { AESDecrypt } from "../crpto/crypto";
+import { Alert } from "@mui/material";
 const AxiosInstance = axios.create({
   baseURL: SERVER_URL
 })

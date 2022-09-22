@@ -19,36 +19,11 @@
   gap: 20px;
   height: calc(100vh - 40px);
   align-items: stretch;
-}
-
-.UserInfo {
-  display: flex;
-  height: 60px;
-  border: solid 1px whitesmoke;
-  gap: 20px;
-  border-radius: 20px;
-  background-color: inherit;
-
-  .avatarWrapper {
-    flex: 1 0 50px;
+  section {
     display: flex;
-    align-items: center;
-  }
-
-  .userWrapper {
-    flex: 10 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    p {
-      margin: 0;
-      font-size: smaller;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
+    width: 100%;
+    justify-content: space-between;
+    border: solid 1px whitesmoke;
   }
 }
 

@@ -1,58 +1,18 @@
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
-import { Button, ButtonGroup, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import { Button, ButtonGroup, IconButton, TextField } from '@mui/material';
 import { InferGetServerSidePropsType } from 'next';
-import dynamic from "next/dynamic";
 import Head from "next/head";
-import Image from 'next/image';
 import nookies from 'nookies';
-import { FormEvent, memo, ReactElement, Suspense, useState } from 'react';
-import { useDispatch, useSelector } from "react-redux";
+import { FormEvent, memo, ReactElement, useState } from 'react';
+import { useSelector } from "react-redux";
+import BasicMenu from '../components/index/Menu';
 import { RootState, wrapper } from '../components/index/store';
-import { openProfile } from "../components/index/uiSlice";
+import UserInfo from '../components/index/UserInfo';
 import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../components/index/userSlice";
 import styles from '../styles/index.module.scss';
 import { AESDecrypt } from '../utils/crpto/crypto';
-
-const FormDialog = dynamic(() => import('../components/index/FomDialog'))
-
-const UserInfo = memo(function UserInfo(): ReactElement {
-  const nickname: string = useSelector((state: RootState) => state.user.nickname)
-  const signature: string = useSelector((state: RootState) => state.user.signature)
-  const avatar: string = useSelector((state: RootState) => state.user.avatarUrl)
-  const toggle: boolean = useSelector((state: RootState) => state.ui.toggleProfile)
-  const dispatch = useDispatch()
-  const handleOpenProfile = () => {
-    dispatch(openProfile())
-  }
-  return (
-    <div className={styles.UserInfo}>
-      <div className={styles.avatarWrapper}>
-        <Tooltip title="点击修改用户信息">
-          <span>
-            <Button variant="text" onClick={handleOpenProfile} disabled={toggle} >
-              {
-                avatar !== '' && <Image referrerPolicy="origin" className={styles.avatar} src={avatar} alt="" width={50} height={50} />
-              }
-            </Button>
-          </span>
-        </Tooltip>
-      </div>
-      <div className={styles.userWrapper}>
-        <Typography variant="h6">
-          {nickname}
-        </Typography>
-        <p>{signature}</p>
-      </div>
-      {
-        toggle && <Suspense>
-          <FormDialog />
-        </Suspense>
-      }
-    </div>
-  )
-})
 
 const SearchBar = memo(function SearchBar(): ReactElement {
   const [search, setSearch] = useState("")
@@ -161,13 +121,19 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async (con
 
 export default function Home(props: InferGetServerSidePropsType<typeof getServerSideProps>): ReactElement {
   const username = useSelector((state: RootState) => state.user.username)
+  const nickname: string = useSelector((state: RootState) => state.user.nickname)
+  const signature: string = useSelector((state: RootState) => state.user.signature)
+  const avatar: string = useSelector((state: RootState) => state.user.avatarUrl)
   return (
     <div className={styles.container}>
       <Head>
         <title>{username === '' ? '正在加载中' : username}</title>
       </Head>
       <aside className={styles.side}>
-        <UserInfo />
+        <section>
+          <UserInfo {...{nickname, signature, avatar}} />
+          <BasicMenu />
+        </section>
         <SearchBar />
         <FriendList />
         <Bottom />
