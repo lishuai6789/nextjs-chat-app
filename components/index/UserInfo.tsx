@@ -1,18 +1,16 @@
 import { Tooltip, Typography } from "@mui/material"
 import { memo, ReactElement } from "react"
 import styles from '../../styles/UserInfo.module.scss'
-interface Props {
+export interface UserInfoProps {
   nickname: string;
   signature: string;
   avatar: string;
 }
-const UserInfo = memo(function UserInfo({nickname, signature, avatar}: Props): ReactElement {
+const UserInfo = memo(function UserInfo({ nickname, signature, avatar }: UserInfoProps): ReactElement {
   return (
     <div className={styles.UserInfo}>
       <div className={styles.avatarWrapper}>
-        <Tooltip title="点击修改用户信息">
-          <img className={styles.avatar} src={avatar} alt="" />
-        </Tooltip>
+        <img className={styles.avatar} src={avatar} alt="" />
       </div>
       <div className={styles.userWrapper}>
         <Typography variant="h6">
