@@ -108,10 +108,10 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async (con
       },
     }
   }
-  await store.dispatch(updateNickname(data.data.nickname));
-  await store.dispatch(updateUsername(data.data.username));
-  await store.dispatch(updateAvatar(data.data.avatarPath));
-  await store.dispatch(updateSignature(data.data.signature));
+  store.dispatch(updateNickname(data.data.nickname));
+  store.dispatch(updateUsername(data.data.username));
+  store.dispatch(updateAvatar(data.data.avatarPath));
+  store.dispatch(updateSignature(data.data.signature));
   return {
     props: {
 

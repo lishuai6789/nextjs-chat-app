@@ -1,7 +1,6 @@
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
-import OSS from "ali-oss";
 import { AxiosResponse } from "axios";
 import { ChangeEvent, DragEvent, memo, ReactElement, useMemo, useState } from "react";
 import 'react-photo-view/dist/react-photo-view.css';
@@ -11,7 +10,8 @@ import AxiosInstance from "../../utils/aixos/axios";
 import { RootState } from "./store";
 import { closeProfile } from "./uiSlice";
 import { updateAvatar, updateNickname, updateSignature } from "./userSlice";
-
+import dynamic from 'next/dynamic';
+const OSS = dynamic(() => import('ali-oss'))
 const ModifyNickname = memo(function ModifyNickname(): ReactElement {
   const nickname: string = useSelector((state: RootState): string => state.user.nickname)
   const dispatch = useDispatch()

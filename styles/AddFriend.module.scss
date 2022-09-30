@@ -3,6 +3,11 @@
   align-items: center;
   gap: 20px;
   padding: 10px;
+  form {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
 }
 .show {
   height: 200px;

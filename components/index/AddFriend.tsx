@@ -8,24 +8,23 @@ import UserInfo from "./UserInfo"
 import { UserInfoProps } from "./UserInfo"
 import AxiosInstance from "../../utils/aixos/axios"
 import { AxiosResponse } from "axios"
-
 const AddFriend = memo(function AddFriend() {
   const toggle: boolean = useSelector((state: RootState): boolean => state.ui.toggleAddFridend)
   const dispatch = useDispatch();
   const handleCloseDialog = () => {
     dispatch(closeAddFriend())
   }
-  const [input, setInput] = useState("");
-  const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
-    setInput(event.target.value)
+  const [username, setUsername] = useState("");
+  const handleInput = (event: ChangeEvent<HTMLInputElement>):void => {
+    setUsername(event.target.value.trim())
   }
   const [user, setUser] = useState<UserInfoProps | null>(null);
   const handleSearch = () => {
-    if (input === "") {
+    if (username === "") {
       return;
     }
-    AxiosInstance.post('/friend/search', {
-      username: input
+    AxiosInstance.post('/profile/getProfile', {
+      username: username
     })
     .then((res: AxiosResponse) => {
 
@@ -39,8 +38,10 @@ const AddFriend = memo(function AddFriend() {
       <DialogTitle>添加好友</DialogTitle>
       <DialogContent>
         <div className={styles.searchWrapper}>
-          <TextField autoFocus label="用户名" value={input} onChange={handleInput}></TextField>
-          <Button variant="contained" onClick={handleSearch}>搜索</Button>
+          <form onSubmit={handleSearch}>
+            <TextField required autoFocus label="用户名" value={username} onChange={handleInput}></TextField>
+            <Button type="submit" variant="contained" onClick={handleSearch}>搜索</Button>
+          </form>
         </div>
         <div className={styles.show}>
           {

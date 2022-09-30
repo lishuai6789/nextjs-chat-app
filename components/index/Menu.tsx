@@ -1,4 +1,4 @@
-import { Button, Menu, MenuItem } from "@mui/material";
+import { Button, Menu, MenuItem, Alert, Snackbar } from "@mui/material";
 import React, { Suspense, useId, memo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
@@ -9,8 +9,6 @@ import { openAddFriend, openProfile } from "./uiSlice";
 import AxiosInstance from "../../utils/aixos/axios";
 import { AxiosResponse } from "axios";
 import { useRouter } from "next/router";
-const Alert = dynamic(() => import('@mui/material/Alert'))
-const Snackbar = dynamic(() => import('@mui/material/Snackbar'))
 
 const BasicMenu = memo(function BasicMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -35,7 +33,11 @@ const BasicMenu = memo(function BasicMenu() {
   const logout = () => {
     AxiosInstance.get('/auth/logout')
       .then(async (res: AxiosResponse) => {
-        await router.push('/auth/login')
+        if (res.data.code === 0) {
+          await router.push('/auth/login')
+        } else {
+          setError(true)
+        }
       })
       .catch((err) => {
         setError(true)
