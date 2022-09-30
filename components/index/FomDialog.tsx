@@ -193,7 +193,7 @@ const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
         .then((res: AxiosResponse) => {
           if (res.data.code === 0) {
             setHelperText({ helperText: '头像上传成功', status: true })
-            dispatch(updateAvatar(res.data.data))
+            dispatch(updateAvatar(`https://litaishuai.oss-cn-hangzhou.aliyuncs.com/img/${path}`))
           } else if (res.data.code === 200) {
             setHelperText({ helperText: '头像上传失败', status: true })
           }
@@ -211,7 +211,7 @@ const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
       uploadImg(event.target.files);
     }
   }
-  const handleDrop = (event: DragEvent<HTMLDivElement>): void => {
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     if (checkType(event.dataTransfer.files)) {
       uploadImg(event.dataTransfer.files)
@@ -253,7 +253,7 @@ const FormDialog = memo(function FormDialog(): ReactElement {
         <MofiyAvatar />
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" type="button" onClick={handleCloseProfile}>取消</Button>
+        <Button variant="contained" type="button" onClick={handleCloseProfile}>关闭</Button>
       </DialogActions>
     </Dialog>
   )

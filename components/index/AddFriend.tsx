@@ -1,5 +1,5 @@
 import { Dialog, DialogTitle, TextField, Button, DialogContent, DialogActions } from "@mui/material"
-import { ChangeEvent, memo, useState } from "react"
+import { ChangeEvent, FormEvent, memo, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "./store"
 import { closeAddFriend } from "./uiSlice"
@@ -19,7 +19,8 @@ const AddFriend = memo(function AddFriend() {
     setUsername(event.target.value.trim())
   }
   const [user, setUser] = useState<UserInfoProps | null>(null);
-  const handleSearch = () => {
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     if (username === "") {
       return;
     }
@@ -27,7 +28,7 @@ const AddFriend = memo(function AddFriend() {
       username: username
     })
     .then((res: AxiosResponse) => {
-
+      console.log(res)
     })
     .catch((error: any) => {
 
@@ -40,7 +41,7 @@ const AddFriend = memo(function AddFriend() {
         <div className={styles.searchWrapper}>
           <form onSubmit={handleSearch}>
             <TextField required autoFocus label="用户名" value={username} onChange={handleInput}></TextField>
-            <Button type="submit" variant="contained" onClick={handleSearch}>搜索</Button>
+            <Button type="submit" variant="contained">搜索</Button>
           </form>
         </div>
         <div className={styles.show}>
