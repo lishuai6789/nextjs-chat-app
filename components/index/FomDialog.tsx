@@ -10,8 +10,7 @@ import AxiosInstance from "../../utils/aixos/axios";
 import { RootState } from "./store";
 import { closeProfile } from "./uiSlice";
 import { updateAvatar, updateNickname, updateSignature } from "./userSlice";
-import dynamic from 'next/dynamic';
-const OSS = dynamic(() => import('ali-oss'))
+import OSS from 'ali-oss'
 const ModifyNickname = memo(function ModifyNickname(): ReactElement {
   const nickname: string = useSelector((state: RootState): string => state.user.nickname)
   const dispatch = useDispatch()
