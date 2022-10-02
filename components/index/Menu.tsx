@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 const AddFriend = dynamic(() => import('./AddFriend'))
 const FormDialog = dynamic(() => import('./FomDialog'))
-import { RootState } from "./store";
-import { openAddFriend, openProfile } from "./uiSlice";
+import { RootState } from "../../store/store";
+import { openAddFriend, openProfile } from "../../store/uiSlice";
 import AxiosInstance from "../../utils/aixos/axios";
 import { AxiosResponse } from "axios";
 import { useRouter } from "next/router";

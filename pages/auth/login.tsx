@@ -45,36 +45,24 @@ export default memo(function Login(): ReactElement {
       password: passwordInfo.password,
       rememberMe: remeberMe,
     })
-      .then(async (res: AxiosResponse) => {
+      .then((res: AxiosResponse) => {
+        console.log("login control")
         setLoading(false)
         if (res.status === 500) {
           setLoginError({ isError: true, mes: '服务器发生错误，请稍后重试' })
         } else if (res.status >= 400) {
           setLoginError({ isError: true, mes: '您的网络可能发生了错误' })
         } else {
-          let data = await res.data
+          let data = res.data
           if (data.code === 0) {
             setLoginError({ isError: false, mes: '' })
-            type saRet = {
-              "tokenName"?: string,
-              "tokenValue"?: string,
-              "isLogin"?: boolean,
-              "loginId"?: string,
-              "loginType"?: string,
-              "tokenTimeout"?: number,
-              "sessionTimeout"?: number,
-              "tokenSessionTimeout"?: number,
-              "tokenActivityTimeout"?: number,
-              "loginDevice"?: number,
-              "tag"?: object | null
-            }
-            let t: saRet = data.data
+            let t = data.data
             localStorage.setItem("satoken", AESEncrypt(t.tokenValue));
             setCookie('satoken', AESEncrypt(t.tokenValue), {
               maxAge: t.tokenTimeout,
               sameSite: 'strict',
-              // httpOnly: true
             });
+            console.log("invoke push to /")
             router.push('/')
           }
         }

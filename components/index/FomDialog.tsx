@@ -7,9 +7,9 @@ import 'react-photo-view/dist/react-photo-view.css';
 import { useDispatch, useSelector } from "react-redux";
 import styles from '../../styles/FormDialog.module.scss';
 import AxiosInstance from "../../utils/aixos/axios";
-import { RootState } from "./store";
-import { closeProfile } from "./uiSlice";
-import { updateAvatar, updateNickname, updateSignature } from "./userSlice";
+import { RootState } from "../../store/store";
+import { closeProfile } from "../../store/uiSlice";
+import { updateAvatar, updateNickname, updateSignature } from "../../store/userSlice";
 import OSS from 'ali-oss'
 const ModifyNickname = memo(function ModifyNickname(): ReactElement {
   const nickname: string = useSelector((state: RootState): string => state.user.nickname)

@@ -8,9 +8,9 @@ import nookies from 'nookies';
 import { FormEvent, memo, ReactElement, useState } from 'react';
 import { useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
-import { RootState, wrapper } from '../components/index/store';
+import { RootState, wrapper } from '../store/store';
 import UserInfo from '../components/index/UserInfo';
-import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../components/index/userSlice";
+import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../store/userSlice";
 import styles from '../styles/index.module.scss';
 import { AESDecrypt } from '../utils/crpto/crypto';
 
