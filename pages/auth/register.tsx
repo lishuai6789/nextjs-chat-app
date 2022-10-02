@@ -1,12 +1,10 @@
-import { ReactElement, memo, useState, FormEvent, useRef, useCallback, ChangeEvent } from "react";
+import { Alert, Button, TextField } from "@mui/material";
+import _ from 'lodash';
 import Head from "next/head";
 import Link from "next/link";
-import { TextField, Button, Alert } from "@mui/material";
-import styles from '../../styles/register.module.scss'
-import _ from 'lodash'
-import axios, { AxiosError } from 'axios'
 import { useRouter } from "next/router";
-import { setCookie } from "cookies-next";
+import { ChangeEvent, FormEvent, memo, ReactElement, useCallback, useState } from "react";
+import styles from '../../styles/register.module.scss';
 // FIXME: 待完善
 const Register = memo(function RegisterMemo(): ReactElement {
   const [usernameInfo, setUsernameInfo] = useState({
