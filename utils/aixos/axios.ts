@@ -19,13 +19,8 @@ AxiosInstance.interceptors.request.use((config: AxiosRequestConfig) => {
   Promise.reject(error)
 })
 AxiosInstance.interceptors.response.use((res: AxiosResponse) => {
-  if (res.status === 401) {
-    console.log("axios interceptors response")
-    throw new Error("HHHHHHHHHHHHHhh")
-  }
   return Promise.resolve(res)
 }, (error: AxiosError) => {
-  console.log("HHHHHHHH")
   if (error.response.status === 401) {
     
   }

@@ -72,7 +72,7 @@ const ModifyNickname = memo(function ModifyNickname(): ReactElement {
         color={color}
         onClick={handleSubmit}
         loadingPosition="end"
-        size="small"
+        sx={{ height: "80%", width: "max-content" }}
         loading={status === 1}
         endIcon={<SendIcon />}>提交</LoadingButton>
     </div>
@@ -149,7 +149,7 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
         color={color}
         onClick={handleSubmit}
         loadingPosition="end"
-        size="small"
+        sx={{ height: "80%", width: "max-content" }}
         loading={status === 1}
         endIcon={<SendIcon />}> 提交</LoadingButton>
     </div >
@@ -252,6 +252,7 @@ const FormDialog = memo(function FormDialog(): ReactElement {
         <ModifySignature />
         <MofiyAvatar />
       </DialogContent>
+      <hr />
       <DialogActions>
         <Button variant="contained" type="button" onClick={handleCloseProfile}>关闭</Button>
       </DialogActions>
