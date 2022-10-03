@@ -49,7 +49,9 @@ const AddFriend = memo(function AddFriend() {
   const [buttonState, setButtonState] = useState<{loading: boolean, color: "primary" | "success" | "error"}>({ loading: false, color: "primary" })
   const handleAdd = () => {
     setButtonState({loading: true, color: "primary"})
-    AxiosInstance.post("/friend/addFriend")
+    AxiosInstance.post("/friend/addFriend", {
+      friend: username
+    })
     .then((res: AxiosResponse) => {
       if (res.data.code === 0) {
         if (res.data.data === null) {
@@ -95,6 +97,7 @@ const AddFriend = memo(function AddFriend() {
           </div>
         }
       </DialogContent>
+      <hr />
       <DialogActions>
         <Button variant="contained" onClick={handleCloseDialog}>关闭</Button>
       </DialogActions>
