@@ -3,19 +3,16 @@
   align-items: center;
   gap: 20px;
   padding: 10px;
+
   form {
     display: flex;
     align-items: center;
     gap: 30px;
   }
 }
-.result {
-  height: fit-content;
-  border: solid 1px whitesmoke;
-  border-radius: 3px;
-  .container {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }

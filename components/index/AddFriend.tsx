@@ -20,30 +20,36 @@ const AddFriend = memo(function AddFriend() {
   const handleInput = (event: ChangeEvent<HTMLInputElement>): void => {
     setUsername(event.target.value.trim())
   }
-  const [showResult, setShowResult] = useState<boolean>(false)
-  const [result, setResult] = useState<UserInfoProps>(null)
+  const [alert, setAlert] = useState({show: false, mes: ''})
+  const [userinfo, setUserinfo] = useState<UserInfoProps>(null)
+  const [needAdd, setNeedAdd] = useState<boolean>(false)
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setShowResult(true)
     if (username === "") {
       return;
     }
-    AxiosInstance.post('/profile/searchProfile', {
-      username: username
+    AxiosInstance.post('/friend/getFriendProfile', {
+      friend: username
     })
-      .then((res: AxiosResponse) => {
-        if (res.data.data == null) {
-          setResult(null)
+      .then(async (res: AxiosResponse) => {
+        const data = await res.data;
+        if (data.data == null) {
+          setUserinfo(null)
+          setAlert({show: true, mes: '查无此人'})
         } else {
-          setResult({
-            "nickname": res.data.data.nickname,
-            "avatar": res.data.data.avatarPath,
-            "signature": res.data.data.signature,
+          setAlert({show: false, mes: ''})
+          setUserinfo({
+            "nickname": data.data.nickname,
+            "avatar": data.data.avatarPath,
+            "signature": data.data.signature,
           })
+          setNeedAdd(data.data.needAdd)
         }
       })
       .catch((error: any) => {
-        console.log(error)
+        setAlert({show: true, mes: '发生了错误'})
+        setUserinfo(null)
+        setButtonState({loading: false, color: "error"})
       })
   }
   const [buttonState, setButtonState] = useState<{loading: boolean, color: "primary" | "success" | "error"}>({ loading: false, color: "primary" })
@@ -59,7 +65,8 @@ const AddFriend = memo(function AddFriend() {
         }
       }
     })
-    .catch(() => {
+    .catch((err: Error) => {
+      console.log(err)
       setButtonState({ loading: false, color: "error" })
     })
   }
@@ -74,27 +81,25 @@ const AddFriend = memo(function AddFriend() {
           </form>
         </div>
         {
-          showResult && <div className={styles.result}>
+          userinfo !== null && <div className={styles.container}>
+            <UserInfo {...userinfo} />
             {
-              result === null && <Alert severity="error">用户不存在</Alert>
-            }
-            {
-              result !== null && <div className={styles.container}>
-                <UserInfo {...result} />
-                <LoadingButton
-                  size="small"
-                  onClick={handleAdd}
-                  endIcon={<SendIcon />}
-                  loading={buttonState.loading}
-                  color={buttonState.color}
-                  loadingPosition="end"
-                  variant="contained"
-                >
-                  添加好友
-                </LoadingButton>
-              </div>
+              needAdd && <LoadingButton
+                size="small"
+                onClick={handleAdd}
+                endIcon={<SendIcon />}
+                loading={buttonState.loading}
+                color={buttonState.color}
+                loadingPosition="end"
+                variant="contained"
+              >
+                添加好友
+              </LoadingButton>
             }
           </div>
+        }
+        {
+          alert.show && <Alert severity="error">{alert.mes}</Alert>
         }
       </DialogContent>
       <hr />

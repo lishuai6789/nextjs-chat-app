@@ -40,7 +40,7 @@ export default memo(function Login(): ReactElement {
       return
     }
     setLoading(true)
-    AxiosInstance.post('/auth/login', {
+    AxiosInstance.post('/auth/logindqwq', {
       username: usernameInfo.username,
       password: passwordInfo.password,
       rememberMe: remeberMe,

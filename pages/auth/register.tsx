@@ -1,11 +1,14 @@
+import { LoadingButton } from "@mui/lab";
 import { Alert, Button, TextField } from "@mui/material";
+import { AxiosError, AxiosResponse } from "axios";
 import _ from 'lodash';
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ChangeEvent, FormEvent, memo, ReactElement, useCallback, useState } from "react";
 import styles from '../../styles/register.module.scss';
-// FIXME: 待完善
+import AxiosInstance from "../../utils/aixos/axios";
+// TODO: 学习使用formik进行组件拆分！！！！！
 const Register = memo(function RegisterMemo(): ReactElement {
   const [usernameInfo, setUsernameInfo] = useState({
     username: '',
@@ -33,7 +36,22 @@ const Register = memo(function RegisterMemo(): ReactElement {
     if (usernameInfo.isError || passwordInfo.isError || retypeInfo.isError) {
       return
     }
-    // TODO: 等待完善
+    let formdata = new URLSearchParams();
+    formdata.append('username', usernameInfo.username)
+    formdata.append('password', passwordInfo.password)
+    AxiosInstance.post('/auth/register', formdata)
+    .then(async(res: AxiosResponse) => {
+      const data = await res.data
+      if (data.code === 0) {
+        setRegisterError({isShow: false, mes: ''})
+        router.push('/auth/login')
+      } else if (data.code === 1) {
+        setRegisterError({isShow: true, mes: '用户名重复'})
+      }
+    })
+    .catch((err: AxiosError) => {
+      setRegisterError({isShow: true, mes: '网络错误'})
+    })
   }
   // TODO: 等待完善
   const checkDuplicate = useCallback(_.debounce(async (username: string) => {
@@ -67,7 +85,6 @@ const Register = memo(function RegisterMemo(): ReactElement {
       setUsernameInfo({ username: newV, isError, helperText })
     } else {
       setUsernameInfo({ username: newV, isError, helperText })
-      // checkDuplicate(newV) // 事件驱动变化，并未使用useEffect
     }
   }
   const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +114,7 @@ const Register = memo(function RegisterMemo(): ReactElement {
       </Head>
       <div className={styles.container}>
         <h2>注册新的账号</h2>
-        <form className={styles.form} onSubmit={handleSubmit} encType="application/x-www-form-urlencoded">
+        <form className={styles.form} onSubmit={handleSubmit} encType="application/x-www-form-urlencoded" autoComplete="off">
           <span>用户名：</span>
           <label>
             <TextField required
@@ -134,6 +151,7 @@ const Register = memo(function RegisterMemo(): ReactElement {
               error={retypeInfo.isError}
               onChange={handleRetype}></TextField>
           </label>
+          <LoadingButton>fwfiwi</LoadingButton>
           <Button variant="contained" type="submit">{isRegister ? '注册中……' : '注册'}</Button>
           <Button variant="contained" type="button"><Link href="/auth/login">登录</Link></Button>
         </form>
