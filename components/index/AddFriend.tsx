@@ -23,6 +23,7 @@ const AddFriend = memo(function AddFriend() {
   const [alert, setAlert] = useState({show: false, mes: ''})
   const [userinfo, setUserinfo] = useState<UserInfoProps>(null)
   const [needAdd, setNeedAdd] = useState<boolean>(false)
+  const [searchBut, setSearchBut] = useState<{ loading: boolean, color: "primary" | "success" | "error" }>({ loading: false, color: "primary" })
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (username === "") {
@@ -43,31 +44,32 @@ const AddFriend = memo(function AddFriend() {
             "avatar": data.data.avatarPath,
             "signature": data.data.signature,
           })
-          setNeedAdd(data.data.needAdd)
+          setNeedAdd(data.needAdd)
         }
+        setSearchBut({ loading: false, color: "success" })
       })
       .catch((error: any) => {
         setAlert({show: true, mes: '发生了错误'})
         setUserinfo(null)
-        setButtonState({loading: false, color: "error"})
+        setSearchBut({loading: false, color: "error"})
       })
   }
-  const [buttonState, setButtonState] = useState<{loading: boolean, color: "primary" | "success" | "error"}>({ loading: false, color: "primary" })
+  const [addButState, setAddButState] = useState<{loading: boolean, color: "primary" | "success" | "error"}>({ loading: false, color: "primary" })
   const handleAdd = () => {
-    setButtonState({loading: true, color: "primary"})
+    setAddButState({loading: true, color: "primary"})
     AxiosInstance.post("/friend/addFriend", {
       friend: username
     })
     .then((res: AxiosResponse) => {
       if (res.data.code === 0) {
         if (res.data.data === null) {
-          setButtonState({loading: false, color: "success"})
+          setAddButState({loading: false, color: "success"})
         }
       }
     })
     .catch((err: Error) => {
       console.log(err)
-      setButtonState({ loading: false, color: "error" })
+      setAddButState({ loading: false, color: "error" })
     })
   }
   return (
@@ -77,19 +79,37 @@ const AddFriend = memo(function AddFriend() {
         <div className={styles.searchWrapper}>
           <form onSubmit={handleSubmit}>
             <TextField required autoFocus label="用户名" value={username} onChange={handleInput}></TextField>
-            <Button type="submit" variant="contained">搜索</Button>
+            <LoadingButton
+              endIcon={<SendIcon />}
+              loading={searchBut.loading}
+              color={searchBut.color}
+              loadingPosition="end"
+              variant="contained"
+              type="submit">
+                搜索
+            </LoadingButton>
           </form>
         </div>
         {
           userinfo !== null && <div className={styles.container}>
             <UserInfo {...userinfo} />
             {
+              !needAdd && <Button
+                size="small"
+                color="primary"
+                variant="contained"
+                disabled={true}
+              >
+                已添加
+              </Button>
+            }
+            {
               needAdd && <LoadingButton
                 size="small"
                 onClick={handleAdd}
                 endIcon={<SendIcon />}
-                loading={buttonState.loading}
-                color={buttonState.color}
+                loading={addButState.loading}
+                color={addButState.color}
                 loadingPosition="end"
                 variant="contained"
               >
