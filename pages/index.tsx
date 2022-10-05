@@ -8,11 +8,10 @@ import nookies from 'nookies';
 import { FormEvent, memo, ReactElement, useState } from 'react';
 import { useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
-import { RootState, wrapper } from '../store/store';
 import UserInfo from '../components/index/UserInfo';
+import { RootState, wrapper } from '../store/store';
 import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../store/userSlice";
 import styles from '../styles/index.module.scss';
-import { AESDecrypt } from '../utils/crpto/crypto';
 
 const SearchBar = memo(function SearchBar(): ReactElement {
   const [search, setSearch] = useState("")
@@ -83,23 +82,17 @@ const InputChat = memo(function InputChat(): ReactElement {
   )
 })
 
-
 export const getServerSideProps = wrapper.getServerSideProps(store => async (context) => {
-  if (!nookies.get(context).satoken) {
-    return {
-      redirect: {
-        destination: '/auth/login',
-        permanent: false,
-      },
-    }
-  }
+  console.log("getServerSideProps", JSON.stringify(nookies.get(context)))
   const res = await fetch('http://localhost:8080/profile/getProfile', {
+    method: 'POST',
+    credentials: "include",
     headers: {
-      satoken: AESDecrypt(nookies.get(context).satoken)
-    },
-    method: "POST"
+      "Cookie": `satoken=${nookies.get(context)["satoken"]}`
+    }
   })
   const data = await res.json();
+  console.log("res", data)
   if (data.code !== 0) {
     return {
       redirect: {
@@ -131,7 +124,7 @@ export default function Home(props: InferGetServerSidePropsType<typeof getServer
       </Head>
       <aside className={styles.side}>
         <section>
-          <UserInfo {...{nickname, signature, avatar}} />
+          <UserInfo {...{ nickname, signature, avatar }} />
           <BasicMenu />
         </section>
         <SearchBar />

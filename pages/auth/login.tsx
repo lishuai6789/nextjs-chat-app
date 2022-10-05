@@ -1,13 +1,11 @@
 import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
 import { AxiosError, AxiosResponse } from 'axios'
-import { setCookie } from "cookies-next"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { ChangeEvent, FormEvent, memo, ReactElement, useState } from "react"
 import styles from '../../styles/login.module.scss'
 import AxiosInstance from "../../utils/aixos/axios"
-import { AESEncrypt } from "../../utils/crpto/crypto"
 const CopyRight = memo(function CopyRight(): ReactElement {
   return (
     <p>
@@ -40,30 +38,22 @@ export default memo(function Login(): ReactElement {
       return
     }
     setLoading(true)
-    AxiosInstance.post('/auth/logindqwq', {
+    AxiosInstance.post('/auth/login', {
       username: usernameInfo.username,
       password: passwordInfo.password,
       rememberMe: remeberMe,
     })
-      .then((res: AxiosResponse) => {
-        console.log("login control")
+      .then(async (res: AxiosResponse) => {
         setLoading(false)
         if (res.status === 500) {
           setLoginError({ isError: true, mes: '服务器发生错误，请稍后重试' })
         } else if (res.status >= 400) {
           setLoginError({ isError: true, mes: '您的网络可能发生了错误' })
         } else {
-          let data = res.data
-          if (data.code === 0) {
+          let data = await res.data
+          if (data.code === 200) {
             setLoginError({ isError: false, mes: '' })
-            let t = data.data
-            localStorage.setItem("satoken", AESEncrypt(t.tokenValue));
-            setCookie('satoken', AESEncrypt(t.tokenValue), {
-              maxAge: t.tokenTimeout,
-              sameSite: 'strict',
-            });
-            console.log("invoke push to /")
-            router.push('/')
+            await router.push('/')
           }
         }
       })
