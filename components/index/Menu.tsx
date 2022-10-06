@@ -3,7 +3,7 @@ import React, { Suspense, useId, memo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 const AddFriend = dynamic(() => import('./AddFriend'))
-const FormDialog = dynamic(() => import('./FomDialog'))
+const EditProfile = dynamic(() => import('./EditProfile'))
 import { RootState } from "../../store/store";
 import { openAddFriend, openProfile } from "../../store/uiSlice";
 import AxiosInstance from "../../utils/aixos/axios";
@@ -71,7 +71,7 @@ const BasicMenu = memo(function BasicMenu() {
       </Menu>
       {
         toggleProfile && <Suspense>
-          <FormDialog />
+          <EditProfile />
         </Suspense>
       }
       {

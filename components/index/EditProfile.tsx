@@ -3,7 +3,6 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { AxiosResponse } from "axios";
 import { ChangeEvent, DragEvent, memo, ReactElement, useMemo, useState } from "react";
-import 'react-photo-view/dist/react-photo-view.css';
 import { useDispatch, useSelector } from "react-redux";
 import styles from '../../styles/FormDialog.module.scss';
 import AxiosInstance from "../../utils/aixos/axios";
@@ -236,7 +235,7 @@ const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
   )
 })
 
-const FormDialog = memo(function FormDialog(): ReactElement {
+const EditProfile = memo(function FormDialog(): ReactElement {
   const toggle: boolean = useSelector((state: RootState): boolean => state.ui.toggleProfile)
   const username: string = useSelector((state: RootState): string => state.user.username)
   const dispatch = useDispatch();
@@ -259,4 +258,4 @@ const FormDialog = memo(function FormDialog(): ReactElement {
     </Dialog>
   )
 })
-export default FormDialog
+export default EditProfile

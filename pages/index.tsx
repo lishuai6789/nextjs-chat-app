@@ -92,7 +92,6 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async (con
     }
   })
   const data = await res.json();
-  console.log("res", data)
   if (data.code !== 0) {
     return {
       redirect: {
