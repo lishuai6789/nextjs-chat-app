@@ -4,13 +4,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { AxiosResponse, AxiosError } from 'axios'
 type PropsType = {
   children: ReactNode;
-  color?: 'inherit'
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'error'
-  | 'info'
-  | 'warning';
+  color?: "error" | "inherit" | "primary" | "secondary" | "info" | "success" | "warning"
   size?: 'small'
   | 'medium'
   | 'large';
@@ -25,28 +19,27 @@ type ActionType = {
 };
 type StateType = {
   loading: boolean;
-  color: 'inherit'
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'error'
-  | 'info'
-  | 'warning';
+  color: "error" | "inherit" | "primary" | "secondary" | "info" | "success" | "warning"
 };
 function reducer(state: StateType, action: ActionType) {
+  let retVal: StateType
   switch (action.type) {
     case "loading":
-      return { loading: true, color: state.color }
+      retVal = { loading: true, color: state.color }
+      return retVal
     case "success":
-      return { loading: false, color: "success" }
+      retVal = { loading: false, color: "success" }
+      return retVal
     case "error":
-      return { loading: false, color: "error" }
+      retVal = { loading: false, color: "error" }
+      return retVal
     default:
       throw new Error("wrong action type");
   }
 }
 function SubmitButton({ children, color = "primary", size = "medium", variant = "text", submit, args }: PropsType): ReactElement {
-  const [state, dispatch] = useReducer(reducer, { loading: false, color: color })
+  const init: StateType = { loading: false, color: color }
+  const [state, dispatch] = useReducer(reducer, init)
   const handleClick = () => {
     dispatch({ type: "loading" })
     submit(args)
