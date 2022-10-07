@@ -1,9 +1,11 @@
-import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
+import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
 import { AxiosError, AxiosResponse } from 'axios'
+import { useFormik } from "formik"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { ChangeEvent, FormEvent, memo, ReactElement, useState } from "react"
+import { memo, ReactElement, useState } from "react"
+import * as Yup from 'yup'
 import styles from '../../styles/login.module.scss'
 import AxiosInstance from "../../utils/aixos/axios"
 const CopyRight = memo(function CopyRight(): ReactElement {
@@ -13,89 +15,56 @@ const CopyRight = memo(function CopyRight(): ReactElement {
     </p>
   )
 })
-export default memo(function Login(): ReactElement {
-  const [usernameInfo, setUsernameInfo] = useState({
-    username: '',
-    helperText: '',
-    isError: false
-  })
-  const [passwordInfo, setPasswordInfo] = useState({
-    password: '',
-    helperText: '',
-    isError: false
-  })
-  const [loginError, setLoginError] = useState({
-    isError: false,
-    mes: ''
-  })
-  const [loading, setLoading] = useState(false)
-  const [remeberMe, setRemeberMe] = useState(true);
+export default function Login(): ReactElement {
   const router = useRouter()
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (usernameInfo.isError || passwordInfo.isError || loading) {
-      return
-    }
-    setLoading(true)
-    AxiosInstance.post('/auth/login', {
-      username: usernameInfo.username,
-      password: passwordInfo.password,
-      rememberMe: remeberMe,
-    })
-      .then(async (res: AxiosResponse) => {
-        setLoading(false)
-        if (res.status === 500) {
-          setLoginError({ isError: true, mes: '服务器发生错误，请稍后重试' })
-        } else if (res.status >= 400) {
-          setLoginError({ isError: true, mes: '您的网络可能发生了错误' })
-        } else {
-          let data = await res.data
-          if (data.code === 200) {
-            setLoginError({ isError: false, mes: '' })
-            await router.push('/')
-          }
-        }
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+      password: '',
+      rememberMe: true
+    },
+    validationSchema: Yup.object({
+      username: Yup.string()
+        .min(3, '用户名长度不能少于三个字符')
+        .max(20, '用户名长度不嫩那个超过20个字符')
+        .required("必填"),
+      password: Yup.string()
+        .min(8, '密码长度过短')
+        .max(20, '密码过长')
+        .required("必填"),
+      rememberMe: Yup.boolean()
+    }),
+    onSubmit: (values, actions) => {
+      setLoading(true)
+      AxiosInstance.post('/auth/login', {
+        username: values.username,
+        password: values.password,
+        rememberMe: values.rememberMe,
       })
-      .catch((error: any) => {
-        setLoading(false)
-        if (error instanceof AxiosError) {
-          if (error.response.status === 500) {
-            setLoginError({
-              isError: true,
-              mes: '服务器发生了错误'
-            })
+        .then(async (res: AxiosResponse) => {
+          setLoading(false)
+          if (res.status === 500) {
+          } else if (res.status >= 400) {
           } else {
-
+            let data = await res.data
+            if (data.code === 200) {
+              await router.push('/')
+            }
           }
-        }
-      })
-  }
-  const handleUsername = (event: ChangeEvent<HTMLInputElement>) => {
-    let newV = event.target.value.trim()
-    let helperText = ""
-    let isError = false
-    if (newV.length < 3 || newV.length > 18) {
-      helperText = "用户名的长度应为3到18"
-      isError = true
-      setUsernameInfo({ username: newV, isError, helperText })
-    } else {
-      setUsernameInfo({ username: newV, isError, helperText })
+        })
+        .catch((error: any) => {
+          setLoading(false)
+          if (error instanceof AxiosError) {
+            if (error.response.status === 500) {
+
+            } else {
+
+            }
+          }
+        })
     }
-  }
-  const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
-    let newV = event.target.value.trim()
-    let isError = false
-    let helperText = ''
-    if (newV.length < 8 || newV.length > 20) {
-      isError = true
-      helperText = '密码的长度为8到20'
-    }
-    setPasswordInfo({ isError, password: newV, helperText })
-  }
-  const handleRemeberMe = () => {
-    setRemeberMe((prev) => !prev)
-  }
+  });
+  const [loading, setLoading] = useState(false)
   return (
     <div className={styles.Login}>
       <Head>
@@ -103,16 +72,40 @@ export default memo(function Login(): ReactElement {
       </Head>
       <div className={styles.container}>
         <h2>登录网上聊天室</h2>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <TextField required error={usernameInfo.isError} helperText={usernameInfo.helperText} name="account" type="text" placeholder="请输入你的账户" autoFocus={true} variant="standard" value={usernameInfo.username} onChange={handleUsername} label="账户名"></TextField>
-          <TextField required error={passwordInfo.isError} name="password" type="password" placeholder="请输入你的密码" variant="standard" helperText={passwordInfo.helperText} value={passwordInfo.password} onChange={handlePassword} label="密码"></TextField>
-          <FormControlLabel value={remeberMe} onChange={handleRemeberMe} control={<Checkbox defaultChecked name="remeberMe" />} label="记住我"></FormControlLabel>
+        <form className={styles.form} onSubmit={formik.handleSubmit}>
+          <TextField required
+            error={formik.errors.username ? true : false}
+            helperText={formik.errors.username}
+            name="username"
+            type="text"
+            placeholder="请输入你的账户"
+            autoFocus={true}
+            variant="standard"
+            value={formik.values.username}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            label="账户名"></TextField>
+          <TextField required
+            error={formik.errors.password ? true: false}
+            name="password"
+            type="password"
+            placeholder="请输入你的密码"
+            variant="standard"
+            helperText={formik.errors.password}
+            value={formik.values.password}
+            onBlur={formik.handleBlur}
+            onChange={formik.handleChange}
+            label="密码"></TextField>
+          <FormControlLabel
+            value={formik.values.rememberMe}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            control={<Checkbox defaultChecked name="remeberMe" />} label="记住我"></FormControlLabel>
           <br />
           <Button variant="contained" type="submit" disabled={loading}>{loading ? '登陆中' : '登录'}</Button>
           <Button variant="contained" type="button"><Link href="/auth/register">注册</Link></Button>
         </form>
-        {loginError.isError && <Alert severity="error">{loginError.mes}</Alert>}
         <CopyRight />
       </div>
     </div>)
-}) 
+}
