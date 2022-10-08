@@ -1,17 +1,23 @@
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
-import { Button, ButtonGroup, IconButton, TextField } from '@mui/material';
+import { Button, ButtonGroup, IconButton, Snackbar, TextField } from '@mui/material';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { InferGetServerSidePropsType } from 'next';
 import Head from "next/head";
+import { useRouter } from 'next/router';
 import nookies from 'nookies';
-import { FormEvent, memo, ReactElement, useState } from 'react';
-import { useSelector } from "react-redux";
+import { FormEvent, memo, ReactElement, useState, createContext, useContext } from 'react';
+import { useDispatch, useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
 import UserInfo from '../components/index/UserInfo';
+import { SERVER_URL } from '../constant/constant';
 import { RootState, wrapper } from '../store/store';
+import { closeAddFriend, closeNotLogin, closeProfile, openNotLogin } from '../store/uiSlice';
 import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../store/userSlice";
 import styles from '../styles/index.module.scss';
+
+export const AxiosContext = createContext(null)
 
 const SearchBar = memo(function SearchBar(): ReactElement {
   const [search, setSearch] = useState("")
@@ -83,7 +89,7 @@ const InputChat = memo(function InputChat(): ReactElement {
 })
 
 export const getServerSideProps = wrapper.getServerSideProps(store => async (context) => {
-  console.log("getServerSideProps", JSON.stringify(nookies.get(context)))
+  console.log("cookie", nookies.get(context))
   const res = await fetch('http://localhost:8080/profile/getProfile', {
     method: 'POST',
     credentials: "include",
@@ -92,7 +98,7 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async (con
     }
   })
   const data = await res.json();
-  if (data.code !== 0) {
+  if (res.status === 401) {
     return {
       redirect: {
         destination: '/auth/login',
@@ -116,25 +122,58 @@ export default function Home(props: InferGetServerSidePropsType<typeof getServer
   const nickname: string = useSelector((state: RootState) => state.user.nickname)
   const signature: string = useSelector((state: RootState) => state.user.signature)
   const avatar: string = useSelector((state: RootState) => state.user.avatarUrl)
+  const toggleNotLogin = useSelector((state: RootState) => state.ui.toggleNotLoginWarm)
+  const dispatch = useDispatch()
+  dispatch(closeAddFriend())
+  dispatch(closeNotLogin())
+  dispatch(closeProfile())
+  const router = useRouter();
+  const AxiosInstance = axios.create({
+    baseURL: SERVER_URL,
+    withCredentials: true
+  })
+  AxiosInstance.interceptors.request.use((config: AxiosRequestConfig) => {
+    return config
+  }, (error: AxiosError) => {
+    Promise.reject(error)
+  })
+  AxiosInstance.interceptors.response.use((res: AxiosResponse) => {
+    return Promise.resolve(res)
+  }, (error: AxiosError) => {
+    if (error.response.status === 401) {
+      dispatch(openNotLogin())
+      router.push('/auth/login')
+      return
+    }
+    return Promise.reject(error)
+  })
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>{username === '' ? '正在加载中' : username}</title>
-      </Head>
-      <aside className={styles.side}>
-        <section>
-          <UserInfo {...{ nickname, signature, avatar }} />
-          <BasicMenu />
-        </section>
-        <SearchBar />
-        <FriendList />
-        <Bottom />
-      </aside>
-      <main className={styles.main}>
-        <MainHeader />
-        <ChatArea />
-        <InputChat />
-      </main>
-    </div>
+    <AxiosContext.Provider value={{ axios: AxiosInstance }}>
+      <div className={styles.container}>
+        <Head>
+          <title>{username === '' ? '正在加载中' : username}</title>
+        </Head>
+        <aside className={styles.side}>
+          <section>
+            <UserInfo {...{ nickname, signature, avatar }} />
+            <BasicMenu />
+          </section>
+          <SearchBar />
+          <FriendList />
+          <Bottom />
+        </aside>
+        <main className={styles.main}>
+          <MainHeader />
+          <ChatArea />
+          <InputChat />
+        </main>
+        <Snackbar
+          open={toggleNotLogin}
+          autoHideDuration={6000}
+          message="您未登录"
+        />
+      </div>
+    </AxiosContext.Provider>
+
   )
 }

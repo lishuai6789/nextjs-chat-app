@@ -1,12 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
-import {HYDRATE} from 'next-redux-wrapper'
+import { HYDRATE } from 'next-redux-wrapper'
 export interface UiInterface {
   toggleProfile: boolean;
   toggleAddFridend: boolean;
+  toggleNotLoginWarm: boolean;
 }
 const initialState: UiInterface = {
   toggleProfile: false,
   toggleAddFridend: false,
+  toggleNotLoginWarm: false,
 }
 export const uiSlice = createSlice({
   name: 'ui',
@@ -23,6 +25,12 @@ export const uiSlice = createSlice({
     },
     closeAddFriend: (state: UiInterface) => {
       state.toggleAddFridend = false
+    },
+    openNotLogin: (state: UiInterface) => {
+      state.toggleNotLoginWarm = true
+    },
+    closeNotLogin: (state: UiInterface) => {
+      state.toggleNotLoginWarm = false
     }
   },
   extraReducers: {
@@ -31,5 +39,5 @@ export const uiSlice = createSlice({
     }
   }
 })
-export const { openProfile, closeProfile, openAddFriend, closeAddFriend } = uiSlice.actions
+export const { openProfile, closeProfile, openAddFriend, closeAddFriend, openNotLogin, closeNotLogin } = uiSlice.actions
 export default uiSlice.reducer;

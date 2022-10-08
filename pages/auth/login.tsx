@@ -1,13 +1,13 @@
 import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
-import { AxiosError, AxiosResponse } from 'axios'
+import axios, { AxiosError, AxiosResponse } from 'axios'
 import { useFormik } from "formik"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { memo, ReactElement, useState } from "react"
 import * as Yup from 'yup'
+import { SERVER_URL } from "../../constant/constant"
 import styles from '../../styles/login.module.scss'
-import AxiosInstance from "../../utils/aixos/axios"
 const CopyRight = memo(function CopyRight(): ReactElement {
   return (
     <p>
@@ -36,19 +36,23 @@ export default function Login(): ReactElement {
     }),
     onSubmit: (values, actions) => {
       setLoading(true)
-      AxiosInstance.post('/auth/login', {
+      axios.post(`${SERVER_URL}/auth/login`, {
         username: values.username,
         password: values.password,
         rememberMe: values.rememberMe,
+      }, {
+        withCredentials: true
       })
         .then(async (res: AxiosResponse) => {
           setLoading(false)
+          console.log(res)
           if (res.status === 500) {
           } else if (res.status >= 400) {
           } else {
             let data = await res.data
             if (data.code === 200) {
-              await router.push('/')
+              console.log("inovke")
+              router.push('/')
             }
           }
         })
@@ -86,7 +90,7 @@ export default function Login(): ReactElement {
             onBlur={formik.handleBlur}
             label="账户名"></TextField>
           <TextField required
-            error={formik.errors.password ? true: false}
+            error={formik.errors.password ? true : false}
             name="password"
             type="password"
             placeholder="请输入你的密码"

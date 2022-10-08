@@ -1,15 +1,15 @@
 import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import OSS from 'ali-oss';
 import { AxiosResponse } from "axios";
-import { ChangeEvent, DragEvent, memo, ReactElement, useMemo, useState } from "react";
+import { ChangeEvent, DragEvent, memo, ReactElement, useContext, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import styles from '../../styles/FormDialog.module.scss';
-import AxiosInstance from "../../utils/aixos/axios";
+import { AxiosContext } from '../../pages';
 import { RootState } from "../../store/store";
 import { closeProfile } from "../../store/uiSlice";
 import { updateAvatar, updateNickname, updateSignature } from "../../store/userSlice";
-import OSS from 'ali-oss'
+import styles from '../../styles/FormDialog.module.scss';
 const ModifyNickname = memo(function ModifyNickname(): ReactElement {
   const nickname: string = useSelector((state: RootState): string => state.user.nickname)
   const dispatch = useDispatch()
@@ -38,12 +38,13 @@ const ModifyNickname = memo(function ModifyNickname(): ReactElement {
       return "error"
     }
   }, [status])
+  const axiosContext = useContext(AxiosContext)
   const handleSubmit = (): void => {
     if (formNickname.isError) {
       return;
     }
     setStatus(1)
-    AxiosInstance.post('/profile/updateNickname', {
+    axiosContext.axios.post('/profile/updateNickname', {
       nickname: formNickname.val
     })
       .then((res: AxiosResponse) => {
@@ -79,6 +80,7 @@ const ModifyNickname = memo(function ModifyNickname(): ReactElement {
 })
 
 const ModifySignature = memo(function ModifySignature(): ReactElement {
+  const axiosContext = useContext(AxiosContext)
   const signature: string = useSelector((state: RootState) => state.user.signature)
   const [formSignature, setFormSignature] = useState({
     val: signature,
@@ -117,7 +119,7 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
       return;
     }
     setStatus(1)
-    AxiosInstance.post('/profile/updateSignature', {
+    axiosContext.axios.post('/profile/updateSignature', {
       signature: formSignature.val
     })
       .then((res: AxiosResponse) => {
@@ -156,6 +158,7 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
 })
 
 const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
+  const axiosContext = useContext(AxiosContext)
   const [helperText, setHelperText] = useState({ helperText: '', status: false });
   const checkType = (files: FileList): boolean => {
     if (files.length !== 1) {
@@ -186,7 +189,7 @@ const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
     })
     const result = await client.put(`img/${path}`, files[0], { headers })
     if (result.res.status === 200) {
-      AxiosInstance.post('/profile/updateAvatar', {
+      axiosContext.axios.post('/profile/updateAvatar', {
         avatar: path
       })
         .then((res: AxiosResponse) => {

@@ -1,15 +1,14 @@
-import { Dialog, DialogTitle, TextField, Button, DialogContent, DialogActions, Alert } from "@mui/material"
+import SendIcon from "@mui/icons-material/Send";
 import LoadingButton from '@mui/lab/LoadingButton';
-import { ChangeEvent, FormEvent, memo, useState } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { RootState } from "../../store/store"
-import { closeAddFriend } from "../../store/uiSlice"
-import styles from '../../styles/AddFriend.module.scss'
-import UserInfo from "./UserInfo"
-import { UserInfoProps } from "./UserInfo"
-import AxiosInstance from "../../utils/aixos/axios"
-import { AxiosResponse } from "axios"
-import SendIcon from "@mui/icons-material/Send"
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { AxiosResponse } from "axios";
+import { ChangeEvent, FormEvent, memo, useContext, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AxiosContext } from "../../pages";
+import { RootState } from "../../store/store";
+import { closeAddFriend } from "../../store/uiSlice";
+import styles from '../../styles/AddFriend.module.scss';
+import UserInfo, { UserInfoProps } from "./UserInfo";
 const AddFriend = memo(function AddFriend() {
   const toggle: boolean = useSelector((state: RootState): boolean => state.ui.toggleAddFridend)
   const dispatch = useDispatch();
@@ -24,12 +23,13 @@ const AddFriend = memo(function AddFriend() {
   const [userinfo, setUserinfo] = useState<UserInfoProps>(null)
   const [needAdd, setNeedAdd] = useState<boolean>(false)
   const [searchBut, setSearchBut] = useState<{ loading: boolean, color: "primary" | "success" | "error" }>({ loading: false, color: "primary" })
+  const axiosContext = useContext(AxiosContext)
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (username === "") {
       return;
     }
-    AxiosInstance.post('/friend/getFriendProfile', {
+    axiosContext.axios.post('/friend/getFriendProfile', {
       friend: username
     })
       .then(async (res: AxiosResponse) => {
@@ -57,7 +57,7 @@ const AddFriend = memo(function AddFriend() {
   const [addButState, setAddButState] = useState<{loading: boolean, color: "primary" | "success" | "error"}>({ loading: false, color: "primary" })
   const handleAdd = () => {
     setAddButState({loading: true, color: "primary"})
-    AxiosInstance.post("/friend/addFriend", {
+    axiosContext.axios.post("/friend/addFriend", {
       friend: username
     })
     .then((res: AxiosResponse) => {

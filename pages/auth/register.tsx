@@ -1,13 +1,12 @@
 import { LoadingButton } from "@mui/lab";
 import { Alert, Button, TextField } from "@mui/material";
-import { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import _ from 'lodash';
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ChangeEvent, FormEvent, memo, ReactElement, useCallback, useState } from "react";
 import styles from '../../styles/register.module.scss';
-import AxiosInstance from "../../utils/aixos/axios";
 // TODO: 学习使用formik进行组件拆分！！！！！
 const Register = memo(function RegisterMemo(): ReactElement {
   const [usernameInfo, setUsernameInfo] = useState({
@@ -39,7 +38,7 @@ const Register = memo(function RegisterMemo(): ReactElement {
     let formdata = new URLSearchParams();
     formdata.append('username', usernameInfo.username)
     formdata.append('password', passwordInfo.password)
-    AxiosInstance.post('/auth/register', formdata)
+    axios.post('/auth/register', formdata)
     .then(async(res: AxiosResponse) => {
       const data = await res.data
       if (data.code === 0) {
