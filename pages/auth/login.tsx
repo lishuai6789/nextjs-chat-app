@@ -1,22 +1,17 @@
-import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
-import axios, { AxiosError, AxiosResponse } from 'axios'
+import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
+import axios, { AxiosResponse } from 'axios'
 import { useFormik } from "formik"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { memo, ReactElement, useState } from "react"
+import { ReactElement, useState } from "react"
 import * as Yup from 'yup'
+import CopyRight from "../../components/CopyRight"
 import { SERVER_URL } from "../../constant/constant"
 import styles from '../../styles/login.module.scss'
-const CopyRight = memo(function CopyRight(): ReactElement {
-  return (
-    <p>
-      Copyright © 李帅的网站
-    </p>
-  )
-})
 export default function Login(): ReactElement {
   const router = useRouter()
+  const [error, setError] = useState("")
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -32,39 +27,38 @@ export default function Login(): ReactElement {
         .min(8, '密码长度过短')
         .max(20, '密码过长')
         .required("必填"),
-      rememberMe: Yup.boolean()
     }),
     onSubmit: (values, actions) => {
       setLoading(true)
-      axios.post(`${SERVER_URL}/auth/login`, {
-        username: values.username,
-        password: values.password,
-        rememberMe: values.rememberMe,
-      }, {
+      const para = new URLSearchParams();
+      para.append("username", values.username)
+      para.append("password", values.password)
+      para.append("rememberMe", values.rememberMe ? "true" : "false")
+      axios.post(`${SERVER_URL}/auth/login`, para, {
         withCredentials: true
       })
         .then(async (res: AxiosResponse) => {
-          setLoading(false)
           console.log(res)
+          setError("")
+          setLoading(false)
           if (res.status === 500) {
+            setError("服务器发生错误")
           } else if (res.status >= 400) {
+            setError("请求不合法，请重新输入")
           } else {
             let data = await res.data
             if (data.code === 200) {
-              console.log("inovke")
               router.push('/')
+            } else if (data.code === 400) {
+              setError("请求不合法，请重新输入")
+            } else if (data.code === 403 || data.code === 500) {
+              setError("用户名或者密码错误")
             }
           }
         })
         .catch((error: any) => {
           setLoading(false)
-          if (error instanceof AxiosError) {
-            if (error.response.status === 500) {
-
-            } else {
-
-            }
-          }
+          setError("登录发生错误，请重试")
         })
     }
   });
@@ -78,8 +72,8 @@ export default function Login(): ReactElement {
         <h2>登录网上聊天室</h2>
         <form className={styles.form} onSubmit={formik.handleSubmit}>
           <TextField required
-            error={formik.errors.username ? true : false}
-            helperText={formik.errors.username}
+            error={formik.touched.username && formik.errors.username ? true : false}
+            helperText={formik.touched.username && formik.errors.username}
             name="username"
             type="text"
             placeholder="请输入你的账户"
@@ -88,17 +82,19 @@ export default function Login(): ReactElement {
             value={formik.values.username}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
+            sx={{height: '60px'}}
             label="账户名"></TextField>
           <TextField required
-            error={formik.errors.password ? true : false}
+            error={formik.touched.password && formik.errors.password ? true : false}
             name="password"
             type="password"
             placeholder="请输入你的密码"
             variant="standard"
-            helperText={formik.errors.password}
+            helperText={formik.touched.password && formik.errors.password}
             value={formik.values.password}
             onBlur={formik.handleBlur}
             onChange={formik.handleChange}
+            sx={{ height: '60px' }}
             label="密码"></TextField>
           <FormControlLabel
             value={formik.values.rememberMe}
@@ -109,6 +105,9 @@ export default function Login(): ReactElement {
           <Button variant="contained" type="submit" disabled={loading}>{loading ? '登陆中' : '登录'}</Button>
           <Button variant="contained" type="button"><Link href="/auth/register">注册</Link></Button>
         </form>
+        {
+          error !== "" && (<Alert severity="error">{error}</Alert>)
+        }
         <CopyRight />
       </div>
     </div>)
