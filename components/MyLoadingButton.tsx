@@ -3,13 +3,15 @@ import { AxiosError, AxiosResponse } from "axios";
 import { ReactNode, useState, ReactElement } from 'react'
 interface PropType {
   children: ReactNode;
-  submit: () => Promise<AxiosError | AxiosResponse>;
+  submit: () => any;
   variant?: "text" | "outlined" | "contained";
+  type?: "submit" | "button"
 };
-// FIXME: 真的有必要封装这个组件吗？
-// 组件的可扩展性怎么样？
-export default function MyLoadingButton({children, submit, variant = "text"}: PropType): ReactElement {
-  const [buttonState, setButtonState] = useState<{ loading: boolean, color: "primary" | "success" | "error" }>({ loading: false, color: "primary" })
+
+export default function MyLoadingButton({children, submit, variant = "text", type="button"}: PropType): ReactElement {
+  const [buttonState, setButtonState] = useState<{ 
+    loading: boolean, 
+    color: "primary" | "success" | "error" }>({ loading: false, color: "primary" })
   const handleClick = () => {
     setButtonState({ loading: true, color: "primary" })
     submit()
@@ -25,6 +27,7 @@ export default function MyLoadingButton({children, submit, variant = "text"}: Pr
       loading={buttonState.loading}
       color={buttonState.color}
       onClick={handleClick}
+      type={type}
       variant={variant}>{children}</LoadingButton>
   )
 }

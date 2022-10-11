@@ -2,83 +2,76 @@ import SendIcon from '@mui/icons-material/Send';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import OSS from 'ali-oss';
-import { AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
+import { useFormik } from 'formik';
 import { ChangeEvent, DragEvent, memo, ReactElement, useContext, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AxiosContext } from '../../pages';
 import { RootState } from "../../store/store";
 import { closeProfile } from "../../store/uiSlice";
 import { updateAvatar, updateNickname, updateSignature } from "../../store/userSlice";
-import styles from '../../styles/FormDialog.module.scss';
+import styles from '../../styles/EditProfile.module.scss';
+import * as Yup from 'yup'
+// TODO: 使用formik改进表单!!!!!
+type ButtonStateType = {
+  loading: boolean;
+  color: "primary" | "success" | "error";
+};
 const ModifyNickname = memo(function ModifyNickname(): ReactElement {
-  const nickname: string = useSelector((state: RootState): string => state.user.nickname)
-  const dispatch = useDispatch()
-  const [formNickname, setFormNickname] = useState({
-    val: nickname,
-    isError: nickname.length <= 0 || nickname.length > 20,
-    helperText: ''
-  });
-  const handleNickname = (event: ChangeEvent<HTMLInputElement>): void => {
-    let newV = event.target.value.trim();
-    if (newV.length === 0) {
-      setFormNickname({ val: newV, helperText: "昵称不能为空", isError: true })
-    } else if (newV.length >= 21) {
-      setFormNickname({ val: newV, helperText: "昵称的最大长度为20", isError: true })
-    } else {
-      setFormNickname({ val: newV, helperText: '', isError: false })
-    }
-  }
-  const [status, setStatus] = useState(0) // 0 初始状态；1 加载中；2 成功；3 错误
-  const color = useMemo((): "primary" | "success" | "error" | "inherit" | "secondary" | "info" | "warning" => {
-    if (status === 0 || status === 1) {
-      return "primary"
-    } else if (status === 2) {
-      return "success"
-    } else {
-      return "error"
-    }
-  }, [status])
   const axiosContext = useContext(AxiosContext)
-  const handleSubmit = (): void => {
-    if (formNickname.isError) {
-      return;
+  const [state, setState] = useState<ButtonStateType>({ loading: false, color: "primary" })
+  const dispatch = useDispatch()
+  const nickname = useSelector((state: RootState) => state.user.nickname)
+  const formik = useFormik({
+    initialValues: {
+      nickname: nickname
+    },
+    validationSchema: Yup.object({
+      nickname: Yup.string()
+        .min(1, "昵称的长度不能少于1个字符")
+        .max(20, "昵称的长度不能超过20个字符")
+        .required("必填")
+    }),
+    enableReinitialize: false,
+    onSubmit: (values, actions) => {
+      const para = new URLSearchParams()
+      para.append("nickname", values.nickname)
+      axiosContext.axios.post("/profile/updateNickname", para)
+        .then((res: AxiosResponse) => {
+          console.log(res)
+          setState({ loading: false, color: "success" })
+          dispatch(updateNickname(values.nickname))
+        })
+        .catch((err: AxiosError) => {
+          setState({ loading: false, color: "error" })
+        })
     }
-    setStatus(1)
-    axiosContext.axios.post('/profile/updateNickname', {
-      nickname: formNickname.val
-    })
-      .then((res: AxiosResponse) => {
-        setStatus(2)
-        dispatch(updateNickname(formNickname.val))
-      })
-      .catch((err: any) => {
-        setStatus(3)
-      })
-  }
+  })
   return (
     <div className={styles.container}>
-      <TextField
-        fullWidth
-        autoComplete="off"
-        label="昵称"
-        type="text"
-        value={formNickname.val}
-        variant="standard"
-        onChange={handleNickname}
-        error={formNickname.isError}
-        helperText={formNickname.helperText}></TextField>
-      <LoadingButton
-        variant="contained"
-        color={color}
-        onClick={handleSubmit}
-        loadingPosition="end"
-        sx={{ height: "80%", width: "max-content" }}
-        loading={status === 1}
-        endIcon={<SendIcon />}>提交</LoadingButton>
+      <form onSubmit={formik.handleSubmit}>
+        <TextField
+          fullWidth
+          autoComplete="off"
+          label="昵称"
+          type="text"
+          name="nickname"
+          placeholder='请输入新的昵称'
+          value={formik.values.nickname}
+          variant="standard"
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={formik.touched.nickname && formik.errors.nickname ? true : false}
+          helperText={formik.touched.nickname && formik.errors.nickname}></TextField>
+        <LoadingButton
+          variant='contained'
+          loading={state.loading}
+          type="submit"
+          color={state.color}>提交</LoadingButton>
+      </form>
     </div>
   )
 })
-
 const ModifySignature = memo(function ModifySignature(): ReactElement {
   const axiosContext = useContext(AxiosContext)
   const signature: string = useSelector((state: RootState) => state.user.signature)
