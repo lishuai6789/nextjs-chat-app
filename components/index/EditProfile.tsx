@@ -4,7 +4,7 @@ import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextF
 import OSS from 'ali-oss';
 import { AxiosError, AxiosResponse } from "axios";
 import { useFormik } from 'formik';
-import { ChangeEvent, DragEvent, memo, ReactElement, useContext, useMemo, useState } from "react";
+import { ChangeEvent, DragEvent, memo, ReactElement, useContext, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AxiosContext } from '../../pages';
 import { RootState } from "../../store/store";
@@ -13,13 +13,28 @@ import { updateAvatar, updateNickname, updateSignature } from "../../store/userS
 import styles from '../../styles/EditProfile.module.scss';
 import * as Yup from 'yup'
 // TODO: 使用formik改进表单!!!!!
-type ButtonStateType = {
-  loading: boolean;
-  color: "primary" | "success" | "error";
-};
+type ButtonStateType =
+  | { loading: false, color: 'primary' }
+  | { loading: true, color: 'primary' }
+  | { loading: false, color: 'success' }
+  | { loading: false, color: 'error' }
+type ButActionType =
+  | { type: 'success' }
+  | { type: "error" }
+  | { type: 'load' };
 const ModifyNickname = memo(function ModifyNickname(): ReactElement {
   const axiosContext = useContext(AxiosContext)
-  const [state, setState] = useState<ButtonStateType>({ loading: false, color: "primary" })
+  const [butState, dispatchBut] = useReducer((state: ButtonStateType, action: ButActionType) => {
+    if (action.type === 'success') {
+      return { loading: false, color: 'success' } as ButtonStateType
+    } else if (action.type === 'error') {
+      return { loading: false, color: 'error' } as ButtonStateType
+    } else if (action.type === 'load') {
+      return { loading: true, color: 'primary' } as ButtonStateType
+    } else {
+      throw new Error()
+    }
+  }, { color: 'primary', loading: false } as ButtonStateType)
   const dispatch = useDispatch()
   const nickname = useSelector((state: RootState) => state.user.nickname)
   const formik = useFormik({
@@ -34,16 +49,16 @@ const ModifyNickname = memo(function ModifyNickname(): ReactElement {
     }),
     enableReinitialize: false,
     onSubmit: (values, actions) => {
+      dispatchBut({ type: 'load' })
       const para = new URLSearchParams()
       para.append("nickname", values.nickname)
       axiosContext.axios.post("/profile/updateNickname", para)
         .then((res: AxiosResponse) => {
-          console.log(res)
-          setState({ loading: false, color: "success" })
+          dispatchBut({ type: 'success' })
           dispatch(updateNickname(values.nickname))
         })
         .catch((err: AxiosError) => {
-          setState({ loading: false, color: "error" })
+          dispatchBut({ type: 'error' })
         })
     }
   })
@@ -65,87 +80,82 @@ const ModifyNickname = memo(function ModifyNickname(): ReactElement {
           helperText={formik.touched.nickname && formik.errors.nickname}></TextField>
         <LoadingButton
           variant='contained'
-          loading={state.loading}
+          loading={butState.loading}
           type="submit"
-          color={state.color}>提交</LoadingButton>
+          sx={{ height: "80%", width: "max-content" }}
+          color={butState.color}
+          endIcon={<SendIcon />}>提交</LoadingButton>
       </form>
     </div>
   )
 })
 const ModifySignature = memo(function ModifySignature(): ReactElement {
   const axiosContext = useContext(AxiosContext)
-  const signature: string = useSelector((state: RootState) => state.user.signature)
-  const [formSignature, setFormSignature] = useState({
-    val: signature,
-    isError: signature.length <= 0 || signature.length > 30,
-    helperText: ''
-  });
-  const handleSignature = (event: ChangeEvent<HTMLInputElement>) => {
-    let newV = event.target.value.trim();
-    if (newV.length <= 0 || newV.length >= 31) {
-      setFormSignature({
-        val: newV,
-        isError: true,
-        helperText: '个性签名的长度在1到30之间'
-      })
-    } else {
-      setFormSignature({
-        val: newV,
-        isError: false,
-        helperText: ''
-      })
-    }
-  }
-  const [status, setStatus] = useState(0) // 0 初始状态；1 加载中；2 成功；3 错误
-  const color = useMemo((): "primary" | "success" | "error" | "inherit" | "secondary" | "info" | "warning" => {
-    if (status === 0 || status === 1) {
-      return "primary"
-    } else if (status === 2) {
-      return "success"
-    } else {
-      return "error"
-    }
-  }, [status])
   const dispatch = useDispatch()
-  const handleSubmit = (): void => {
-    if (formSignature.isError) {
-      return;
+  const signature = useSelector((state: RootState) => state.user.signature)
+  const [butState, dispatchBut] = useReducer((state: ButtonStateType, action: ButActionType) => {
+    if (action.type === 'success') {
+      return { loading: false, color: 'success' } as ButtonStateType
+    } else if (action.type === 'error') {
+      return { loading: false, color: 'error' } as ButtonStateType
+    } else if (action.type === 'load') {
+      return { loading: true, color: 'primary' } as ButtonStateType
+    } else {
+      throw new Error()
     }
-    setStatus(1)
-    axiosContext.axios.post('/profile/updateSignature', {
-      signature: formSignature.val
-    })
-      .then((res: AxiosResponse) => {
-        if (res.data.code === 0) {
-          setStatus(2)
-          dispatch(updateSignature(formSignature.val))
-        } else if (res.data.code === 200) {
-          setStatus(3);
-        }
-      })
-      .catch((err: any) => {
-        setStatus(3)
-      })
-  }
+  }, { color: 'primary', loading: false } as ButtonStateType)
+  const formik = useFormik({
+    initialValues: {
+      signature: signature
+    },
+    enableReinitialize: false,
+    validationSchema: Yup.object({
+      signature: Yup.string()
+        .max(20, "个性签名的长度不能超过三十个字符")
+        .required("必填")
+    }),
+    onSubmit: (values, actions) => {
+      dispatchBut({ type: 'load' })
+      const para = new URLSearchParams();
+      para.append("signature", values.signature)
+      axiosContext.axios.post("/profile/updateSignature", para)
+        .then(async (res: AxiosResponse) => {
+          const data = await res.data
+          if (data.code === 200) {
+            dispatch(updateSignature(values.signature))
+            dispatchBut({ type: 'success' })
+          } else {
+            dispatchBut({ type: 'error' })
+          }
+        })
+        .catch((err: any) => {
+          dispatchBut({ type: 'error' })
+        })
+    }
+  })
   return (
     <div className={styles.container}>
-      <TextField autoComplete="off"
-        variant="standard"
-        fullWidth
-        type="text"
-        label="个性签名"
-        value={formSignature.val}
-        onChange={handleSignature}
-        helperText={formSignature.helperText}
-        error={formSignature.isError}></TextField>
-      <LoadingButton
-        variant="contained"
-        color={color}
-        onClick={handleSubmit}
-        loadingPosition="end"
-        sx={{ height: "80%", width: "max-content" }}
-        loading={status === 1}
-        endIcon={<SendIcon />}> 提交</LoadingButton>
+      <form onSubmit={formik.handleSubmit}>
+        <TextField autoComplete="off"
+          variant="standard"
+          fullWidth
+          type="text"
+          name="signature"
+          label="个性签名"
+          value={formik.values.signature}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          helperText={formik.touched.signature && formik.errors.signature}
+          error={formik.touched.signature && formik.errors.signature ? true : false}></TextField>
+        <LoadingButton
+          variant="contained"
+          color={butState.color}
+          type="submit"
+          loadingPosition="end"
+          sx={{ height: "80%", width: "max-content" }}
+          loading={butState.loading}
+          endIcon={<SendIcon />}>提交</LoadingButton>
+      </form>
     </div >
   )
 })

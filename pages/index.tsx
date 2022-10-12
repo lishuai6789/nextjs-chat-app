@@ -2,12 +2,12 @@ import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
 import { Button, ButtonGroup, IconButton, Snackbar, TextField } from '@mui/material';
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { InferGetServerSidePropsType } from 'next';
 import Head from "next/head";
 import { useRouter } from 'next/router';
 import nookies from 'nookies';
-import { FormEvent, memo, ReactElement, useState, createContext, useContext } from 'react';
+import { createContext, FormEvent, memo, ReactElement, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
 import UserInfo from '../components/index/UserInfo';
@@ -89,7 +89,6 @@ const InputChat = memo(function InputChat(): ReactElement {
 })
 
 export const getServerSideProps = wrapper.getServerSideProps(store => async (context) => {
-  console.log("cookie", nookies.get(context))
   const res = await fetch('http://localhost:8080/profile/getProfile', {
     method: 'POST',
     credentials: "include",
@@ -174,6 +173,5 @@ export default function Home(props: InferGetServerSidePropsType<typeof getServer
         />
       </div>
     </AxiosContext.Provider>
-
   )
 }

@@ -14,7 +14,7 @@ const UserInfo = memo(function UserInfo({ nickname, signature, avatar }: UserInf
         <Image className={styles.avatar} src={avatar} alt="" width={50} height={50} referrerPolicy="origin-when-cross-origin" />
       </div>
       <div className={styles.userWrapper}>
-        <Typography variant="h6">
+        <Typography variant="body1">
           {nickname}
         </Typography>
         <Typography variant="body1">
