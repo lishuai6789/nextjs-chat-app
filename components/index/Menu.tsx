@@ -6,7 +6,7 @@ const AddFriend = dynamic(() => import('./AddFriend'))
 const EditProfile = dynamic(() => import('./EditProfile'))
 import { RootState } from "../../store/store";
 import { openAddFriend, openProfile } from "../../store/uiSlice";
-import AxiosInstance from "../../utils/aixos/axios";
+import {useAxios} from "../../api/useAxios";
 import { AxiosResponse } from "axios";
 import { useRouter } from "next/router";
 
@@ -30,6 +30,7 @@ const BasicMenu = memo(function BasicMenu() {
   }
   const [error, setError] = useState(false)
   const router = useRouter();
+  const AxiosInstance = useAxios();
   const logout = () => {
     AxiosInstance.get('/auth/logout')
       .then(async (res: AxiosResponse) => {
@@ -67,7 +68,7 @@ const BasicMenu = memo(function BasicMenu() {
       >
         <MenuItem onClick={(): void => { handleClose(); openAddFriends() }}>添加好友</MenuItem>
         <MenuItem onClick={(): void => { handleClose(); handleOpenProfile() }}>修改信息</MenuItem>
-        <MenuItem onClick={(): void => { handleClose(); logout() }}>Logout</MenuItem>
+        <MenuItem onClick={(): void => { handleClose(); logout() }}>退出登录</MenuItem>
       </Menu>
       {
         toggleProfile && <Suspense>

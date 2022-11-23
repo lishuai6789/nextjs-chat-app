@@ -1,17 +1,21 @@
-import { Alert, Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
-import axios, { AxiosResponse } from 'axios'
+import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
+import { message } from "antd"
+import { AxiosResponse } from 'axios'
 import { useFormik } from "formik"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { ReactElement, useState } from "react"
 import * as Yup from 'yup'
+import { reqLogin } from "../../api"
+import {useAxios} from "../../api/useAxios"
 import CopyRight from "../../components/CopyRight"
-import { SERVER_URL } from "../../constant/constant"
 import styles from '../../styles/login.module.scss'
 export default function Login(): ReactElement {
   const router = useRouter()
-  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const myAxios = useAxios();
+  const [messageApi, contextHolder] = message.useMessage();
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -30,44 +34,33 @@ export default function Login(): ReactElement {
     }),
     onSubmit: (values, actions) => {
       setLoading(true)
-      const para = new URLSearchParams();
-      para.append("username", values.username)
-      para.append("password", values.password)
-      para.append("rememberMe", values.rememberMe ? "true" : "false")
-      axios.post(`${SERVER_URL}/auth/login`, para, {
-        withCredentials: true
-      })
+      myAxios(reqLogin(values.username, values.password, values.rememberMe))
         .then(async (res: AxiosResponse) => {
-          console.log(res)
-          setError("")
           setLoading(false)
-          if (res.status === 500) {
-            setError("服务器发生错误")
-          } else if (res.status >= 400) {
-            setError("请求不合法，请重新输入")
-          } else {
-            let data = await res.data
-            if (data.code === 200) {
-              router.push('/')
-            } else if (data.code === 400) {
-              setError("请求不合法，请重新输入")
-            } else if (data.code === 403 || data.code === 500) {
-              setError("用户名或者密码错误")
-            }
+          let data = await res.data
+          if (data.code === 200) {
+            messageApi.success({
+              content: "成功登录"
+            })
+            router.push('/')
+          } else if (data.code === 500) {
+            messageApi.error({content: "用户名或者密码错误"});
+          } else if (data.code === 400) {
+            messageApi.error({content: "输入的格式错误，请重新输入"});
           }
         })
         .catch((error: any) => {
+          console.log(error)
           setLoading(false)
-          setError("登录发生错误，请重试")
         })
     }
   });
-  const [loading, setLoading] = useState(false)
   return (
     <div className={styles.Login}>
       <Head>
         <title>登录</title>
       </Head>
+      {contextHolder}
       <div className={styles.container}>
         <h2>登录网上聊天室</h2>
         <form className={styles.form} onSubmit={formik.handleSubmit}>
@@ -82,7 +75,7 @@ export default function Login(): ReactElement {
             value={formik.values.username}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            sx={{height: '60px'}}
+            sx={{ height: '60px' }}
             label="账户名"></TextField>
           <TextField required
             error={formik.touched.password && formik.errors.password ? true : false}
@@ -105,9 +98,6 @@ export default function Login(): ReactElement {
           <Button variant="contained" type="submit" disabled={loading}>{loading ? '登陆中' : '登录'}</Button>
           <Button variant="contained" type="button"><Link href="/auth/register">注册</Link></Button>
         </form>
-        {
-          error !== "" && (<Alert severity="error">{error}</Alert>)
-        }
         <CopyRight />
       </div>
     </div>)

@@ -1,41 +1,21 @@
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
-import { Button, ButtonGroup, IconButton, Snackbar, TextField } from '@mui/material';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { Button, ButtonGroup, IconButton, Snackbar } from '@mui/material';
 import { InferGetServerSidePropsType } from 'next';
 import Head from "next/head";
-import { useRouter } from 'next/router';
 import nookies from 'nookies';
-import { createContext, FormEvent, memo, ReactElement, useState } from 'react';
+import { createContext, memo, ReactElement } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
+import SearchBar from '../components/index/SearchBar';
 import UserInfo from '../components/index/UserInfo';
-import { SERVER_URL } from '../constant/constant';
 import { RootState, wrapper } from '../store/store';
-import { closeAddFriend, closeNotLogin, closeProfile, openNotLogin } from '../store/uiSlice';
+import { closeAddFriend, closeNotLogin, closeProfile } from '../store/uiSlice';
 import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../store/userSlice";
 import styles from '../styles/index.module.scss';
-
 export const AxiosContext = createContext(null)
 
-const SearchBar = memo(function SearchBar(): ReactElement {
-  const [search, setSearch] = useState("")
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault()
-  }
-  const handleChange = (event: any) => {
-    setSearch(event.target.value)
-  }
-  return (
-    <div className={styles.SearchBar}>
-      <form onSubmit={handleSubmit}>
-        <TextField className={styles.input} placeholder="请问你想找点什么?" size="small" variant='standard' />
-        <Button className={styles.button} type="submit" variant="contained" value={search} onChange={handleChange} >搜索</Button>
-      </form>
-    </div>
-  )
-})
 const FriendList = memo(function FriendList(): ReactElement {
   return (
     <div className={styles.FriendList}>
@@ -126,52 +106,30 @@ export default function Home(props: InferGetServerSidePropsType<typeof getServer
   dispatch(closeAddFriend())
   dispatch(closeNotLogin())
   dispatch(closeProfile())
-  const router = useRouter();
-  const AxiosInstance = axios.create({
-    baseURL: SERVER_URL,
-    withCredentials: true
-  })
-  AxiosInstance.interceptors.request.use((config: AxiosRequestConfig) => {
-    return config
-  }, (error: AxiosError) => {
-    Promise.reject(error)
-  })
-  AxiosInstance.interceptors.response.use((res: AxiosResponse) => {
-    return Promise.resolve(res)
-  }, (error: AxiosError) => {
-    if (error.response.status === 401) {
-      dispatch(openNotLogin())
-      router.push('/auth/login')
-      return
-    }
-    return Promise.reject(error)
-  })
   return (
-    <AxiosContext.Provider value={{ axios: AxiosInstance }}>
-      <div className={styles.container}>
-        <Head>
-          <title>{username === '' ? '正在加载中' : username}</title>
-        </Head>
-        <aside className={styles.side}>
-          <section>
-            <UserInfo {...{ nickname, signature, avatar }} />
-            <BasicMenu />
-          </section>
-          <SearchBar />
-          <FriendList />
-          <Bottom />
-        </aside>
-        <main className={styles.main}>
-          <MainHeader />
-          <ChatArea />
-          <InputChat />
-        </main>
-        <Snackbar
-          open={toggleNotLogin}
-          autoHideDuration={6000}
-          message="您未登录"
-        />
-      </div>
-    </AxiosContext.Provider>
+    <div className={styles.container}>
+      <Head>
+        <title>{username === '' ? '正在加载中' : username}</title>
+      </Head>
+      <aside className={styles.side}>
+        <section>
+          <UserInfo {...{ nickname, signature, avatar }} />
+          <BasicMenu />
+        </section>
+        <SearchBar />
+        <FriendList />
+        <Bottom />
+      </aside>
+      <main className={styles.main}>
+        <MainHeader />
+        <ChatArea />
+        <InputChat />
+      </main>
+      <Snackbar
+        open={toggleNotLogin}
+        autoHideDuration={6000}
+        message="您未登录"
+      />
+    </div>
   )
 }

@@ -33,7 +33,7 @@ export const uiSlice = createSlice({
       state.toggleNotLoginWarm = false
     }
   },
-  extraReducers: {
+  extraReducers: {// FIXME: 具体的原理是什么？
     [HYDRATE]: (state, action) => {
       state.toggleProfile = action.payload.ui.toggleProfile
     }

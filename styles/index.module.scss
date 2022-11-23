@@ -27,26 +27,6 @@
   }
 }
 
-.SearchBar {
-  flex: 0 30px;
-  // overflow: hidden;
-  background-color: white;
-
-  form {
-    height: 100%;
-    display: flex;
-    gap: 3px;
-
-    .input {
-      flex: 1 0;
-    }
-
-    .button {
-      height: 100%;
-    }
-  }
-}
-
 .FriendList {
   flex: 1 0;
   border: solid 1px black;

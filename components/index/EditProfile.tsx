@@ -6,12 +6,12 @@ import { AxiosError, AxiosResponse } from "axios";
 import { useFormik } from 'formik';
 import { ChangeEvent, DragEvent, memo, ReactElement, useContext, useReducer, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AxiosContext } from '../../pages';
 import { RootState } from "../../store/store";
 import { closeProfile } from "../../store/uiSlice";
 import { updateAvatar, updateNickname, updateSignature } from "../../store/userSlice";
 import styles from '../../styles/EditProfile.module.scss';
-import * as Yup from 'yup'
+import * as Yup from 'yup';
+import { useAxios } from '../../api/useAxios';
 // TODO: 使用formik改进表单!!!!!
 type ButtonStateType =
   | { loading: false, color: 'primary' }
@@ -23,7 +23,7 @@ type ButActionType =
   | { type: "error" }
   | { type: 'load' };
 const ModifyNickname = memo(function ModifyNickname(): ReactElement {
-  const axiosContext = useContext(AxiosContext)
+  const request = useAxios()
   const [butState, dispatchBut] = useReducer((state: ButtonStateType, action: ButActionType) => {
     if (action.type === 'success') {
       return { loading: false, color: 'success' } as ButtonStateType
@@ -52,7 +52,7 @@ const ModifyNickname = memo(function ModifyNickname(): ReactElement {
       dispatchBut({ type: 'load' })
       const para = new URLSearchParams()
       para.append("nickname", values.nickname)
-      axiosContext.axios.post("/profile/updateNickname", para)
+      request.post("/profile/updateNickname", para)
         .then((res: AxiosResponse) => {
           dispatchBut({ type: 'success' })
           dispatch(updateNickname(values.nickname))
@@ -90,8 +90,8 @@ const ModifyNickname = memo(function ModifyNickname(): ReactElement {
   )
 })
 const ModifySignature = memo(function ModifySignature(): ReactElement {
-  const axiosContext = useContext(AxiosContext)
   const dispatch = useDispatch()
+  const request = useAxios()
   const signature = useSelector((state: RootState) => state.user.signature)
   const [butState, dispatchBut] = useReducer((state: ButtonStateType, action: ButActionType) => {
     if (action.type === 'success') {
@@ -118,7 +118,7 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
       dispatchBut({ type: 'load' })
       const para = new URLSearchParams();
       para.append("signature", values.signature)
-      axiosContext.axios.post("/profile/updateSignature", para)
+      request.post("/profile/updateSignature", para)
         .then(async (res: AxiosResponse) => {
           const data = await res.data
           if (data.code === 200) {
@@ -161,7 +161,7 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
 })
 
 const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
-  const axiosContext = useContext(AxiosContext)
+  const request = useAxios()
   const [helperText, setHelperText] = useState({ helperText: '', status: false });
   const checkType = (files: FileList): boolean => {
     if (files.length !== 1) {
@@ -192,7 +192,7 @@ const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
     })
     const result = await client.put(`img/${path}`, files[0], { headers })
     if (result.res.status === 200) {
-      axiosContext.axios.post('/profile/updateAvatar', {
+      request.post('/profile/updateAvatar', {
         avatar: path
       })
         .then((res: AxiosResponse) => {

@@ -5,6 +5,8 @@ import React, { ErrorInfo, FC, ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { wrapper } from '../store/store'
 import '../styles/app.scss'
+import 'normalize.css/normalize.css'
+import { message, } from 'antd'
 interface PropsType {
   children?: ReactNode;
 }
@@ -42,20 +44,22 @@ class ErrorBoundary extends React.Component<PropsType, StateType> {
         </div>
       )
     }
-
-    // Return children components in case of no error
-
     return this.props.children
   }
 }
+export const MessageContext = React.createContext<any>({});
 const MyApp: FC<AppProps> = ({ Component, ...rest }) => {
   const { store, props } = wrapper.useWrappedStore(rest);
+  const [messageApi, contextHolder] = message.useMessage();
   return (<ErrorBoundary>
     <Provider store={store}>
       <Head>
         <title>聊天室</title>
       </Head>
-      <Component {...props.pageProps} />
+      <MessageContext.Provider value={messageApi}>
+        {contextHolder}
+        <Component {...props.pageProps} />
+      </MessageContext.Provider>
     </Provider>
   </ErrorBoundary>
   )

@@ -27,15 +27,20 @@
 .form {
   width: 80%;
   margin: 0 auto;
-  // height: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: center;
   a {
     width: 100%;
     height: 100%;
     text-decoration: none;
     color: white;
   }
+}
+.inputs {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
 }

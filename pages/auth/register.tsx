@@ -1,17 +1,21 @@
-import { Alert, Button, TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { useFormik } from "formik";
 import Head from "next/head";
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 import * as Yup from 'yup';
 import styles from '../../styles/register.module.scss';
-import axios, { AxiosError, AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
 import { useRouter } from "next/router";
 import CopyRight from "../../components/CopyRight";
-import { SERVER_URL } from "../../constant/constant";
+import { useAxios } from "../../api/useAxios";
+import { reqRegister } from "../../api";
+import { message } from "antd";
 const Register = function Register(): ReactElement {
-  const router = useRouter()
-  const [error, setError] = useState("")
+  const router = useRouter();
+  const myAxios = useAxios();
+  const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = useState(false);
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -32,27 +36,24 @@ const Register = function Register(): ReactElement {
         .required("必填")
     }),
     onSubmit: (values, actions) => {
-      const para = new URLSearchParams();
-      para.append('username', values.username)
-      para.append('password', values.password)
-      axios.post(`${SERVER_URL}/auth/register`, para)
+      setLoading(true);
+      myAxios(reqRegister(values.username, values.password))
         .then(async (res: AxiosResponse) => {
-          console.log(res)
-          setError("")
           const data = await res.data
-          if (res.status >= 500) {
-            setError("注册发生了错误")
-          } else if (res.status === 400) {
-            setError("请求不合法，请重新输入")
-          } else if (data.code === 200) {
-            setError("")
+          setLoading(false);
+          if (data.code === 200) {
+            messageApi.success("成功注册，请登录您的账号");
             router.push('/auth/login')
-          } else if (data.code === 500 || data.code === 1) {
-            setError("用户名已被注册，请更换用户名")
+          } else if (data.code === 400) {
+            messageApi.error("输入格式不正确，请重新输入");
+          } else if (data.code === 500) {
+            messageApi.error("用户名重复，请更换用户名");
+            actions.setFieldError("username", "用户名重复")
           }
         })
         .catch((err: AxiosError) => {
-          setError("注册发生了错误")
+          setLoading(false)
+          messageApi.error("请检查您的网络");
         })
     }
   });
@@ -61,11 +62,11 @@ const Register = function Register(): ReactElement {
       <Head>
         <title>注册</title>
       </Head>
+      {contextHolder}
       <div className={styles.container}>
         <h2>注册新的账号</h2>
         <form className={styles.form} onSubmit={formik.handleSubmit} encType="application/x-www-form-urlencoded" autoComplete="off">
-          <span>用户名：</span>
-          <label>
+          <div className={styles.inputs}>
             <TextField required
               error={formik.touched.username && formik.errors.username ? true : false}
               helperText={formik.touched.username && formik.errors.username}
@@ -75,24 +76,22 @@ const Register = function Register(): ReactElement {
               autoFocus={true}
               onBlur={formik.handleBlur}
               variant="standard"
+              sx={{ height: '60px' }}
+              label="用户名"
               value={formik.values.username}
               onChange={formik.handleChange}></TextField>
-          </label>
-          <span>密  码：</span>
-          <label>
             <TextField required
               error={formik.touched.password && formik.errors.password ? true : false}
               name="password"
               type="password"
               placeholder="请输入你的密码"
               variant="standard"
+              label="密码"
               helperText={formik.touched.password && formik.errors.password}
               value={formik.values.password}
+              sx={{ height: '60px' }}
               onBlur={formik.handleBlur}
               onChange={formik.handleChange}></TextField>
-          </label>
-          <span>确认密码：</span>
-          <label>
             <TextField required
               type="password"
               name="retype"
@@ -101,17 +100,16 @@ const Register = function Register(): ReactElement {
               helperText={formik.touched.retype && formik.errors.retype}
               value={formik.values.retype}
               onBlur={formik.handleBlur}
+              sx={{ height: '60px' }}
+              label="确认密码"
               error={formik.touched.retype && formik.errors.retype ? true : false}
               onChange={formik.handleChange}></TextField>
-          </label>
-          <Button variant="contained" type="submit">注册</Button>
-          <Button variant="contained" type="button"><Link href="/auth/login">登录</Link></Button>
+          </div>
+          <div className={styles.buttons}>
+            <Button variant="contained" disabled={loading} type="submit">{loading ? "注册中" : "注册"}</Button>
+            <Button variant="contained" type="button"><Link href="/auth/login">登录</Link></Button>
+          </div>
         </form>
-        {
-          error !== "" && (
-            <Alert severity="error">{error}</Alert>
-          )
-        }
         <CopyRight />
       </div>
     </div>
