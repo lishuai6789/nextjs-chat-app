@@ -1,5 +1,4 @@
 import { Typography } from "@mui/material";
-import Image from "next/image";
 import { memo, ReactElement } from "react";
 import styles from '../../styles/UserInfo.module.scss';
 export interface UserInfoProps {
