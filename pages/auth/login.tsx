@@ -4,7 +4,7 @@ import { useFormik } from "formik"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { ReactElement, useEffect, useState } from "react"
+import { ReactElement, useState } from "react"
 import * as Yup from 'yup'
 import { reqLogin } from "../../api"
 import {useAxios} from "../../api/useAxios"
