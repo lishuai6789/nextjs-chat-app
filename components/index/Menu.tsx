@@ -1,14 +1,15 @@
-import { Button, Menu, MenuItem, Alert, Snackbar } from "@mui/material";
-import React, { Suspense, useId, memo, useState } from "react";
+import { Button, Menu, MenuItem } from "@mui/material";
+import React, { Suspense, useId, memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
-const AddFriend = dynamic(() => import('./AddFriend'))
-const EditProfile = dynamic(() => import('./EditProfile'))
 import { RootState } from "../../store/store";
 import { openAddFriend, openProfile } from "../../store/uiSlice";
-import {useAxios} from "../../api/useAxios";
-import { AxiosResponse } from "axios";
+import { useAxios } from "../../api/useAxios";
 import { useRouter } from "next/router";
+import { reqLogout } from "../../api";
+import { message } from "antd";
+const AddFriend = dynamic(() => import('./AddFriend'))
+const EditProfile = dynamic(() => import('./EditProfile'))
 
 const BasicMenu = memo(function BasicMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -28,25 +29,28 @@ const BasicMenu = memo(function BasicMenu() {
   const handleOpenProfile = () => {
     dispatch(openProfile())
   }
-  const [error, setError] = useState(false)
   const router = useRouter();
   const AxiosInstance = useAxios();
-  const logout = () => {
-    AxiosInstance.get('/auth/logout')
-      .then(async (res: AxiosResponse) => {
-        if (res.data.code === 0) {
-          await router.push('/auth/login')
-        } else {
-          setError(true)
-        }
-      })
-      .catch((err) => {
-        setError(true)
-      })
+  const [messageApi, contextHolder] = message.useMessage();
+  const logout = async () => {
+    const res = await AxiosInstance(reqLogout());
+    const data = await res.data;
+    if (data.code === 200) {
+      messageApi.success({
+        content: "成功退出登录"
+      });
+      router.push("/auth/login");
+    } else if (data.code === 500) {
+      messageApi.error({
+        content: "您还未登录，请先登录"
+      });
+      router.push("/auth/login");
+    }
   }
   const id = useId();
   return (
     <div style={{ display: 'flex', 'alignItems': 'center' }}>
+      {contextHolder}
       <Button
         id={id}
         aria-controls={open ? 'basic-menu' : undefined}
@@ -79,16 +83,6 @@ const BasicMenu = memo(function BasicMenu() {
         toggleAddFriend && <Suspense>
           <AddFriend />
         </Suspense>
-      }
-      {
-        error && <Snackbar open={error}
-          autoHideDuration={6000}
-          onClose={() => setError(false)}>
-          <Alert severity="error"
-          >
-            非常抱歉，网络出现了错误
-          </Alert>
-        </Snackbar>
       }
     </div>
   );

@@ -1,11 +1,10 @@
 import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material"
 import { message } from "antd"
-import { AxiosResponse } from 'axios'
 import { useFormik } from "formik"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { ReactElement, useState } from "react"
+import { ReactElement, useEffect, useState } from "react"
 import * as Yup from 'yup'
 import { reqLogin } from "../../api"
 import {useAxios} from "../../api/useAxios"
@@ -13,9 +12,9 @@ import CopyRight from "../../components/CopyRight"
 import styles from '../../styles/login.module.scss'
 export default function Login(): ReactElement {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
   const myAxios = useAxios();
   const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = useState(false);
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -32,27 +31,17 @@ export default function Login(): ReactElement {
         .max(20, '密码过长')
         .required("必填"),
     }),
-    onSubmit: (values, actions) => {
-      setLoading(true)
-      myAxios(reqLogin(values.username, values.password, values.rememberMe))
-        .then(async (res: AxiosResponse) => {
-          setLoading(false)
-          let data = await res.data
-          if (data.code === 200) {
-            messageApi.success({
-              content: "成功登录"
-            })
-            router.push('/')
-          } else if (data.code === 500) {
-            messageApi.error({content: "用户名或者密码错误"});
-          } else if (data.code === 400) {
-            messageApi.error({content: "输入的格式错误，请重新输入"});
-          }
-        })
-        .catch((error: any) => {
-          console.log(error)
-          setLoading(false)
-        })
+    onSubmit: async (values, actions) => {
+      setLoading(true);
+      const res = await myAxios(reqLogin(values.username, values.password, values.rememberMe));
+      const data = await res.data;
+      setLoading(false);
+      if (data.code === 200) {
+        messageApi.success({content: "成功登录"});
+        router.push("/");
+      } else {
+        messageApi.error({content: "用户名或者密码错误，请重新输入"});
+      }
     }
   });
   return (

@@ -35,26 +35,20 @@ const Register = function Register(): ReactElement {
         .oneOf([Yup.ref('password'), null], '密码不匹配')
         .required("必填")
     }),
-    onSubmit: (values, actions) => {
+    onSubmit: async (values, actions) => {
       setLoading(true);
-      myAxios(reqRegister(values.username, values.password))
-        .then(async (res: AxiosResponse) => {
-          const data = await res.data
-          setLoading(false);
-          if (data.code === 200) {
-            messageApi.success("成功注册，请登录您的账号");
-            router.push('/auth/login')
-          } else if (data.code === 400) {
-            messageApi.error("输入格式不正确，请重新输入");
-          } else if (data.code === 500) {
-            messageApi.error("用户名重复，请更换用户名");
-            actions.setFieldError("username", "用户名重复")
-          }
-        })
-        .catch((err: AxiosError) => {
-          setLoading(false)
-          messageApi.error("请检查您的网络");
-        })
+      const res = await myAxios(reqRegister(values.username, values.password));
+      const data = await res.data
+      setLoading(false);
+      if (data.code === 200) {
+        messageApi.success("成功注册，请登录您的账号");
+        router.push('/auth/login')
+      } else if (data.code === 400) {
+        messageApi.error("输入格式不正确，请重新输入");
+      } else if (data.code === 500) {
+        messageApi.error("用户名重复，请更换用户名");
+        actions.setFieldError("username", "用户名重复")
+      }
     }
   });
   return (
