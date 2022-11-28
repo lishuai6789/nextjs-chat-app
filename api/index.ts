@@ -42,3 +42,21 @@ export const reqGetFriendProfile = (friend: string): AxiosRequestConfig => {
     method: "POST"
   }
 }
+export const reqUpdateNickname = (nickname: string): AxiosRequestConfig => {
+  const para = new URLSearchParams();
+  para.append("nickname", nickname);
+  return {
+    url: "/profile/updateNickname",
+    method: "POST",
+    data: para
+  }
+}
+export const reqUpdateSignature = (signature: string): AxiosRequestConfig => {
+  const para = new URLSearchParams();
+  para.append("signature", signature);
+  return {
+    url: "/profile/updateSignature",
+    method: "POST",
+    data: para
+  }
+}

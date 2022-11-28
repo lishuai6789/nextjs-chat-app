@@ -11,7 +11,7 @@ import { message } from "antd";
 const AddFriend = dynamic(() => import('./AddFriend'))
 const EditProfile = dynamic(() => import('./EditProfile'))
 
-const BasicMenu = memo(function BasicMenu() {
+const BasicMenu = function BasicMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -86,6 +86,6 @@ const BasicMenu = memo(function BasicMenu() {
       }
     </div>
   );
-})
+}
 
 export default BasicMenu

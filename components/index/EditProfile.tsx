@@ -1,10 +1,8 @@
-import SendIcon from '@mui/icons-material/Send';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Alert, TextField } from "@mui/material";
 import OSS from 'ali-oss';
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { useFormik } from 'formik';
-import { ChangeEvent, DragEvent, memo, ReactElement, useContext, useReducer, useState } from "react";
+import { ChangeEvent, DragEvent, memo, ReactElement, useState, MouseEvent, FormEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { closeProfile } from "../../store/uiSlice";
@@ -12,31 +10,14 @@ import { updateAvatar, updateNickname, updateSignature } from "../../store/userS
 import styles from '../../styles/EditProfile.module.scss';
 import * as Yup from 'yup';
 import { useAxios } from '../../api/useAxios';
-// TODO: 使用formik改进表单!!!!!
-type ButtonStateType =
-  | { loading: false, color: 'primary' }
-  | { loading: true, color: 'primary' }
-  | { loading: false, color: 'success' }
-  | { loading: false, color: 'error' }
-type ButActionType =
-  | { type: 'success' }
-  | { type: "error" }
-  | { type: 'load' };
-const ModifyNickname = memo(function ModifyNickname(): ReactElement {
+import { reqUpdateNickname, reqUpdateSignature } from '../../api';
+import { Modal, Button, Input, Space } from 'antd';
+import { SendOutlined } from '@ant-design/icons';
+const ModifyNickname = function ModifyNickname(): ReactElement {
   const request = useAxios()
-  const [butState, dispatchBut] = useReducer((state: ButtonStateType, action: ButActionType) => {
-    if (action.type === 'success') {
-      return { loading: false, color: 'success' } as ButtonStateType
-    } else if (action.type === 'error') {
-      return { loading: false, color: 'error' } as ButtonStateType
-    } else if (action.type === 'load') {
-      return { loading: true, color: 'primary' } as ButtonStateType
-    } else {
-      throw new Error()
-    }
-  }, { color: 'primary', loading: false } as ButtonStateType)
   const dispatch = useDispatch()
   const nickname = useSelector((state: RootState) => state.user.nickname)
+  const [loading, setLoading] = useState(false);
   const formik = useFormik({
     initialValues: {
       nickname: nickname
@@ -48,62 +29,55 @@ const ModifyNickname = memo(function ModifyNickname(): ReactElement {
         .required("必填")
     }),
     enableReinitialize: false,
-    onSubmit: (values, actions) => {
-      dispatchBut({ type: 'load' })
-      const para = new URLSearchParams()
-      para.append("nickname", values.nickname)
-      request.post("/profile/updateNickname", para)
-        .then((res: AxiosResponse) => {
-          dispatchBut({ type: 'success' })
+    onSubmit: async (values, actions) => {
+      setLoading(true);
+      const para = new URLSearchParams();
+      para.append("nickname", values.nickname);
+      try {
+        const res = await request(reqUpdateNickname(values.nickname));
+        const data = await res.data;
+        if (data.code === 200) {
           dispatch(updateNickname(values.nickname))
-        })
-        .catch((err: AxiosError) => {
-          dispatchBut({ type: 'error' })
-        })
+        }
+      } catch (error: any) {
+      } finally {
+        setLoading(false);
+      }
     }
   })
   return (
     <div className={styles.container}>
-      <form onSubmit={formik.handleSubmit}>
-        <TextField
-          fullWidth
-          autoComplete="off"
-          label="昵称"
+      <form onSubmit={(event: FormEvent<HTMLFormElement>) => {
+        event.stopPropagation();
+        formik.handleSubmit(event);
+      }}>
+        <Input
+          addonBefore="昵称"
           type="text"
-          name="nickname"
-          placeholder='请输入新的昵称'
           value={formik.values.nickname}
-          variant="standard"
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          error={formik.touched.nickname && formik.errors.nickname ? true : false}
-          helperText={formik.touched.nickname && formik.errors.nickname}></TextField>
-        <LoadingButton
-          variant='contained'
-          loading={butState.loading}
-          type="submit"
-          sx={{ height: "80%", width: "max-content" }}
-          color={butState.color}
-          endIcon={<SendIcon />}>提交</LoadingButton>
+          name="nickname"
+          placeholder='请输入新的昵称'
+        />
+        <Button
+          type="primary"
+          disabled={loading}
+          loading={loading}
+          htmlType="submit"
+          size="middle"
+          icon={<SendOutlined />}
+          shape='round'
+          onClick={(event: MouseEvent<HTMLElement>) => event.stopPropagation()}>提交</Button>
       </form>
     </div>
   )
-})
+}
 const ModifySignature = memo(function ModifySignature(): ReactElement {
   const dispatch = useDispatch()
   const request = useAxios()
   const signature = useSelector((state: RootState) => state.user.signature)
-  const [butState, dispatchBut] = useReducer((state: ButtonStateType, action: ButActionType) => {
-    if (action.type === 'success') {
-      return { loading: false, color: 'success' } as ButtonStateType
-    } else if (action.type === 'error') {
-      return { loading: false, color: 'error' } as ButtonStateType
-    } else if (action.type === 'load') {
-      return { loading: true, color: 'primary' } as ButtonStateType
-    } else {
-      throw new Error()
-    }
-  }, { color: 'primary', loading: false } as ButtonStateType)
+  const [loading, setLoading] = useState(false);
   const formik = useFormik({
     initialValues: {
       signature: signature
@@ -114,30 +88,28 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
         .max(20, "个性签名的长度不能超过三十个字符")
         .required("必填")
     }),
-    onSubmit: (values, actions) => {
-      dispatchBut({ type: 'load' })
+    onSubmit: async (values, actions) => {
       const para = new URLSearchParams();
       para.append("signature", values.signature)
-      request.post("/profile/updateSignature", para)
-        .then(async (res: AxiosResponse) => {
-          const data = await res.data
-          if (data.code === 200) {
-            dispatch(updateSignature(values.signature))
-            dispatchBut({ type: 'success' })
-          } else {
-            dispatchBut({ type: 'error' })
-          }
-        })
-        .catch((err: any) => {
-          dispatchBut({ type: 'error' })
-        })
+      setLoading(true);
+      try {
+        const res = await request(reqUpdateSignature(values.signature));
+        const data = await res.data;
+        if (data.code === 200) {
+          dispatch(updateSignature(values.signature))
+        }
+      } catch (error: any) {
+
+      } finally {
+        setLoading(false);
+      }
     }
   })
   return (
     <div className={styles.container}>
       <form onSubmit={formik.handleSubmit}>
         <TextField autoComplete="off"
-          variant="standard"
+          variant="filled"
           fullWidth
           type="text"
           name="signature"
@@ -147,14 +119,12 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
           onBlur={formik.handleBlur}
           helperText={formik.touched.signature && formik.errors.signature}
           error={formik.touched.signature && formik.errors.signature ? true : false}></TextField>
-        <LoadingButton
-          variant="contained"
-          color={butState.color}
-          type="submit"
-          loadingPosition="end"
-          sx={{ height: "80%", width: "max-content" }}
-          loading={butState.loading}
-          endIcon={<SendIcon />}>提交</LoadingButton>
+        <Button
+          type="primary"
+          htmlType="submit"
+          disabled={loading}
+          loading={loading}
+          icon={<SendOutlined />}>提交</Button>
       </form>
     </div >
   )
@@ -245,23 +215,20 @@ const EditProfile = memo(function FormDialog(): ReactElement {
   const toggle: boolean = useSelector((state: RootState): boolean => state.ui.toggleProfile)
   const username: string = useSelector((state: RootState): string => state.user.username)
   const dispatch = useDispatch();
-  const handleCloseProfile = (): void => {
+  const handleCloseProfile = (event: MouseEvent<HTMLElement>): void => {
+    event.stopPropagation();
     dispatch(closeProfile())
   }
   return (
-    <Dialog open={toggle} onClose={handleCloseProfile}>
-      <DialogTitle>修改用户信息</DialogTitle>
-      <DialogContent>
-        <TextField disabled value={username} variant="standard" fullWidth label="用户名(不可以修改！！)"></TextField>
+    <Modal open={toggle} title="修改用户信息" centered={true} footer={null} destroyOnClose={true} onCancel={handleCloseProfile}>
+      <Space direction="vertical">
+        <Input size="large" value={username} disabled={true}
+          addonBefore={"用户名不可修改"} /><br></br>
         <ModifyNickname />
         <ModifySignature />
         <MofiyAvatar />
-      </DialogContent>
-      <hr />
-      <DialogActions>
-        <Button variant="contained" type="button" onClick={handleCloseProfile}>关闭</Button>
-      </DialogActions>
-    </Dialog>
+      </Space>
+    </Modal>
   )
 })
 export default EditProfile

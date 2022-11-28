@@ -1,8 +1,9 @@
 .container {
+  height: 100px;
   form {
     display: grid;
     grid-template-columns: 10fr 1fr;
-    align-items: center;
+    align-items: stretch;
   }
 }
 

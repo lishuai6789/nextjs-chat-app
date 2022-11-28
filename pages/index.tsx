@@ -5,7 +5,7 @@ import { Button, ButtonGroup, IconButton, Snackbar } from '@mui/material';
 import { InferGetServerSidePropsType } from 'next';
 import Head from "next/head";
 import nookies from 'nookies';
-import { createContext, memo, ReactElement } from 'react';
+import { createContext, memo, ReactElement, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
 import SearchBar from '../components/index/SearchBar';
@@ -69,7 +69,7 @@ const InputChat = memo(function InputChat(): ReactElement {
 })
 
 export const getServerSideProps = wrapper.getServerSideProps(store => async (context) => {
-  const res = await fetch('http://localhost:8080/profile/getProfile', {
+  const res = await fetch('http://localhost:8080/profile/getOwnProfile', {
     method: 'POST',
     credentials: "include",
     headers: {
@@ -103,9 +103,11 @@ export default function Home(props: InferGetServerSidePropsType<typeof getServer
   const avatar: string = useSelector((state: RootState) => state.user.avatarUrl)
   const toggleNotLogin = useSelector((state: RootState) => state.ui.toggleNotLoginWarm)
   const dispatch = useDispatch()
-  dispatch(closeAddFriend())
-  dispatch(closeNotLogin())
-  dispatch(closeProfile())
+  useEffect(() => {
+    dispatch(closeAddFriend())
+    dispatch(closeNotLogin())
+    dispatch(closeProfile())
+  }, [])
   return (
     <div className={styles.container}>
       <Head>

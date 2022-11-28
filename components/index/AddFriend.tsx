@@ -1,8 +1,6 @@
-import SendIcon from "@mui/icons-material/Send";
-import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useFormik } from "formik";
-import { ChangeEvent, memo, useState } from "react";
+import { memo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { closeAddFriend } from "../../store/uiSlice";
@@ -18,15 +16,10 @@ const AddFriend = memo(function AddFriend() {
   const handleCloseDialog = () => {
     dispatch(closeAddFriend())
   }
-  const [username, setUsername] = useState("");
-  const handleInput = (event: ChangeEvent<HTMLInputElement>): void => {
-    setUsername(event.target.value.trim())
-  }
-  const [alert, setAlert] = useState({ show: false, mes: '' })
   const [userinfo, setUserinfo] = useState<UserInfoProps>(null)
   const [needAdd, setNeedAdd] = useState<boolean>(false)
-  const [searchBut, setSearchBut] = useState<{ loading: boolean, color: "primary" | "success" | "error" }>({ loading: false, color: "primary" })
   const myAxios = useAxios();
+  const [searchLoading, setSearchLoading] = useState(false);
   const searchFormik = useFormik({
     initialValues: {
       username: '',
@@ -35,9 +28,16 @@ const AddFriend = memo(function AddFriend() {
       username: string().required("必填")
     }),
     onSubmit: async (values, actions) => {
+      setSearchLoading(true);
       const res = await myAxios(reqGetFriendProfile(values.username));
       const data = await res.data;
-      setUserinfo({nickname: data.data.nickname as string, signature: data.data.signature as string, avatar: data.data.avatar as string});
+      setSearchLoading(false);
+      if (data.data) {
+        setUserinfo({ nickname: data.data.nickname as string, signature: data.data.signature as string, avatar: data.data.avatar as string });
+        setNeedAdd(data.data.needAdd as boolean);
+      } else {
+        actions.setFieldError("username", "查无此人");
+      }
     }
   })
   return (
@@ -46,22 +46,21 @@ const AddFriend = memo(function AddFriend() {
       <DialogContent>
         <div className={styles.searchWrapper}>
           <form onSubmit={searchFormik.handleSubmit}>
-            <TextField required autoFocus label="用户名" value={username}
+            <TextField required autoFocus
+              label="用户名"
               name="username"
               type="text"
               onChange={searchFormik.handleChange}
+              value={searchFormik.values.username}
               onBlur={searchFormik.handleBlur}
               error={searchFormik.touched.username && searchFormik.errors.username ? true : false} helperText={searchFormik.touched.username && searchFormik.errors.username}
-              sx={{height: '60px'}}></TextField>
-            <LoadingButton
-              endIcon={<SendIcon />}
-              loading={searchBut.loading}
-              color={searchBut.color}
-              loadingPosition="end"
+              sx={{ height: '60px' }}></TextField>
+            <Button
+              disabled={searchLoading}
               variant="contained"
               type="submit">
               搜索用户
-            </LoadingButton>
+            </Button>
           </form>
         </div>
         {
@@ -78,22 +77,14 @@ const AddFriend = memo(function AddFriend() {
               </Button>
             }
             {
-              needAdd && <LoadingButton
+              needAdd && <Button
                 size="small"
-                onClick={handleAdd}
-                endIcon={<SendIcon />}
-                loading={addButState.loading}
-                color={addButState.color}
-                loadingPosition="end"
                 variant="contained"
               >
                 添加好友
-              </LoadingButton>
+              </Button>
             }
           </div>
-        }
-        {
-          alert.show && <Alert severity="error">{alert.mes}</Alert>
         }
       </DialogContent>
       <hr />
