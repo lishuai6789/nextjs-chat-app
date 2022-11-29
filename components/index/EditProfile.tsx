@@ -1,8 +1,8 @@
-import { Alert, TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import OSS from 'ali-oss';
 import { AxiosResponse } from "axios";
 import { useFormik } from 'formik';
-import { ChangeEvent, DragEvent, memo, ReactElement, useState, MouseEvent, FormEvent } from "react";
+import { ReactElement, useState, MouseEvent, FormEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { closeProfile } from "../../store/uiSlice";
@@ -11,8 +11,11 @@ import styles from '../../styles/EditProfile.module.scss';
 import * as Yup from 'yup';
 import { useAxios } from '../../api/useAxios';
 import { reqUpdateNickname, reqUpdateSignature } from '../../api';
-import { Modal, Button, Input, Space } from 'antd';
+import { Modal, Input, Space, message } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
+import Upload from "antd/es/upload/Upload";
+import { RcFile } from "antd/es/upload";
+
 const ModifyNickname = function ModifyNickname(): ReactElement {
   const request = useAxios()
   const dispatch = useDispatch()
@@ -51,29 +54,31 @@ const ModifyNickname = function ModifyNickname(): ReactElement {
         event.stopPropagation();
         formik.handleSubmit(event);
       }}>
-        <Input
-          addonBefore="昵称"
+        <TextField
+          label="昵称"
           type="text"
           value={formik.values.nickname}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           name="nickname"
           placeholder='请输入新的昵称'
+          fullWidth
+          error={formik.errors.nickname ? true : false}
+          helperText={formik.touched.nickname && formik.errors.nickname}
+          sx={{height: '80px'}}
         />
         <Button
-          type="primary"
+          variant="contained"
           disabled={loading}
-          loading={loading}
-          htmlType="submit"
-          size="middle"
-          icon={<SendOutlined />}
-          shape='round'
-          onClick={(event: MouseEvent<HTMLElement>) => event.stopPropagation()}>提交</Button>
+          type="submit"
+          size="small"
+          endIcon={<SendOutlined />}>提交</Button>
       </form>
     </div>
   )
 }
-const ModifySignature = memo(function ModifySignature(): ReactElement {
+
+const ModifySignature = function ModifySignature(): ReactElement {
   const dispatch = useDispatch()
   const request = useAxios()
   const signature = useSelector((state: RootState) => state.user.signature)
@@ -109,7 +114,6 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
     <div className={styles.container}>
       <form onSubmit={formik.handleSubmit}>
         <TextField autoComplete="off"
-          variant="filled"
           fullWidth
           type="text"
           name="signature"
@@ -118,36 +122,20 @@ const ModifySignature = memo(function ModifySignature(): ReactElement {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           helperText={formik.touched.signature && formik.errors.signature}
-          error={formik.touched.signature && formik.errors.signature ? true : false}></TextField>
+          error={formik.touched.signature && formik.errors.signature ? true : false}
+          sx={{height: '80px'}}></TextField>
         <Button
-          type="primary"
-          htmlType="submit"
+          size="small"
+          variant="contained"
           disabled={loading}
-          loading={loading}
-          icon={<SendOutlined />}>提交</Button>
+          endIcon={<SendOutlined />}>提交</Button>
       </form>
     </div >
   )
-})
+}
 
-const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
+const MofiyAvatar = function MofiyAvatar(): ReactElement {
   const request = useAxios()
-  const [helperText, setHelperText] = useState({ helperText: '', status: false });
-  const checkType = (files: FileList): boolean => {
-    if (files.length !== 1) {
-      setHelperText({ helperText: "文件的数量应为1", status: true });
-    } else if (!files[0].type.includes("image")) {
-      setHelperText({ helperText: "仅支持上传图片类型文件", status: true })
-    } else if (files[0].size >= 1048576) {
-      setHelperText({ helperText: "图片的大小应为1MB以下", status: true });
-    } else {
-      setHelperText(prev => {
-        return { ...prev, status: false }
-      })
-      return true
-    }
-    return false;
-  }
   const dispatch = useDispatch()
   const uploadImg = async (files: FileList) => {
     const headers = {
@@ -167,51 +155,37 @@ const MofiyAvatar = memo(function MofiyAvatar(): ReactElement {
       })
         .then((res: AxiosResponse) => {
           if (res.data.code === 0) {
-            setHelperText({ helperText: '头像上传成功', status: true })
+            
             dispatch(updateAvatar(`https://litaishuai.oss-cn-hangzhou.aliyuncs.com/img/${path}`))
           } else if (res.data.code === 200) {
-            setHelperText({ helperText: '头像上传失败', status: true })
           }
         })
         .catch((e: any) => {
-          setHelperText({ helperText: '头像上传失败', status: true })
         })
     } else {
-      setHelperText({ helperText: '头像上传失败', status: true })
     }
   }
-  const handleAvatar = async (event: ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    if (checkType(event.target.files)) {
-      uploadImg(event.target.files);
+  const beforeUpload = (file: RcFile) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+      message.error('You can only upload JPG/PNG file!');
     }
-  }
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    if (checkType(event.dataTransfer.files)) {
-      uploadImg(event.dataTransfer.files)
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      message.error('Image must smaller than 2MB!');
     }
-  }
+    return isJpgOrPng && isLt2M;
+  };
   return (
-    <div className={styles.avatarContainer}
-      onDragOver={(e: DragEvent<HTMLDivElement>): void => e.preventDefault()}
-      onDragLeave={(e: DragEvent<HTMLDivElement>): void => e.preventDefault()}
-      onDragEnter={(e: DragEvent<HTMLDivElement>): void => e.preventDefault()}
-      onDrop={handleDrop}
-      draggable="true">
-      <label>
-        点击或拖放至此区域即可更换头像
-        <input type="file" onChange={handleAvatar} accept="image/*" style={{ display: 'none' }} />
-        {
-          helperText.helperText.length !== 0 &&
-          <Alert severity={helperText.status ? 'success' : 'error'}>{helperText.helperText}</Alert>
-        }
-      </label>
+    <div className={styles.avatarContainer}>
+      <Upload name="avatar" showUploadList={false} beforeUpload={beforeUpload}>
+        {}
+      </Upload>
     </div>
   )
-})
+}
 
-const EditProfile = memo(function FormDialog(): ReactElement {
+const EditProfile = function FormDialog(): ReactElement {
   const toggle: boolean = useSelector((state: RootState): boolean => state.ui.toggleProfile)
   const username: string = useSelector((state: RootState): string => state.user.username)
   const dispatch = useDispatch();
@@ -230,5 +204,5 @@ const EditProfile = memo(function FormDialog(): ReactElement {
       </Space>
     </Modal>
   )
-})
+}
 export default EditProfile

@@ -1,12 +1,11 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { useRouter } from "next/router";
-import { useContext } from "react";
 import { SERVER_URL } from "../constant/constant";
-import { MessageContext } from "../pages/_app";
+import { message } from 'antd';
 // 想改的话，以后再说！！！！
 export function useAxios() {
   const router = useRouter();
-  const messageApi = useContext(MessageContext);
+  
   const AxiosInstance = axios.create({
     baseURL: SERVER_URL,
     withCredentials: true,
@@ -21,12 +20,12 @@ export function useAxios() {
     return Promise.resolve(res)
   }, (error: AxiosError) => {
     if (error.response.status >= 500) {
-      messageApi.error({ content: "服务器发生错误" });
+      message.error({ content: "服务器发生错误" });
     } else if (error.response.status === 401) {
-      messageApi.error({ content: "您还未登录" });
+      message.error({ content: "您还未登录" });
       router.push('/auth/login')
     } else {
-      messageApi.error({ content: `未知错误${error.message}` });
+      message.error({ content: `未知错误${error.message}` });
     }
     return Promise.reject(error)
   });
