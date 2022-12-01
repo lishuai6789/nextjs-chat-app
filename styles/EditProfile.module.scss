@@ -12,19 +12,20 @@
   align-items: center;
   height: 100px;
   display: grid;
-  grid-template-columns: 4fr 1fr 1fr;
+  grid-template-columns: 3fr 1fr 1fr;
   width: 100%;
 
-  .t {
-    background-color: blue;
+  .dragContainer {
+    display: block;
+    height: 100%;
+    background-color: rgb(191, 177, 177);
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 5px;
+    border: 1px solid whitesmoke;
   }
-}
 
-.dragContainer {
-  display: block;
-  height: 100%;
-  background-color: gray;
-  cursor: pointer;
-  border-radius: 10px;
-  padding: 5px;
+  .dragContainer:hover {
+    border: solid 1px rgb(75, 75, 194);
+  }
 }

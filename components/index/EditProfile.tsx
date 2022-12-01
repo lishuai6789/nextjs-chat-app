@@ -68,7 +68,7 @@ const ModifyNickname = (): ReactElement => {
           disabled={loading}
           type="submit"
           size="small"
-          endIcon={<SendOutlined />}>提交</Button>
+          endIcon={<SendOutlined />}>{loading ? "提交中" : "提交"}</Button>
       </form>
     </div>
   )
@@ -125,7 +125,7 @@ const ModifySignature = (): ReactElement => {
           size="small"
           variant="contained"
           disabled={loading}
-          endIcon={<SendOutlined />}>提交</Button>
+          endIcon={<SendOutlined />}>{loading ? "提交中" : "提交"}</Button>
       </form>
     </div >
   )
@@ -227,7 +227,7 @@ const EditProfile = (): ReactElement => {
     <Modal open={toggle} title="修改用户信息" centered={true} footer={null} destroyOnClose={true} onCancel={handleCloseProfile}>
       <Space direction="vertical">
         <Input size="large" value={username} disabled={true}
-          addonBefore={"用户名不可修改"} /><br></br>
+          addonBefore={"用户名不可修改"} />
         <ModifyNickname />
         <ModifySignature />
         <MofiyAvatar />
