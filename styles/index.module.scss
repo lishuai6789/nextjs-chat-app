@@ -19,10 +19,11 @@
   gap: 20px;
   height: calc(100vh - 40px);
   align-items: stretch;
+
   section {
-    display: flex;
+    display: grid;
     width: 100%;
-    justify-content: space-between;
+    grid-template-columns: 8fr 1fr;
     border: solid 1px whitesmoke;
   }
 }
