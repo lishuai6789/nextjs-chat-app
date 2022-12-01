@@ -6,8 +6,6 @@ import { Provider } from 'react-redux'
 import { wrapper } from '../store/store'
 import '../styles/app.scss'
 import 'normalize.css/normalize.css'
-import { message, } from 'antd'
-import { useAxios } from '../api/useAxios'
 interface PropsType {
   children?: ReactNode;
 }
@@ -51,17 +49,12 @@ class ErrorBoundary extends React.Component<PropsType, StateType> {
 export const MessageContext = React.createContext<any>({});
 const MyApp: FC<AppProps> = ({ Component, ...rest }) => {
   const { store, props } = wrapper.useWrappedStore(rest);
-  const [messageApi, contextHolder] = message.useMessage();
-  const myAxios = useAxios();
   return (<ErrorBoundary>
     <Provider store={store}>
       <Head>
         <title>聊天室</title>
       </Head>
-      <MessageContext.Provider value={messageApi}>
-        {contextHolder}
-        <Component {...props.pageProps} />
-      </MessageContext.Provider>
+      <Component {...props.pageProps} />
     </Provider>
   </ErrorBoundary>
   )

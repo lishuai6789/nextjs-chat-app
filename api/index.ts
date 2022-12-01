@@ -60,3 +60,13 @@ export const reqUpdateSignature = (signature: string): AxiosRequestConfig => {
     data: para
   }
 }
+export const reqUpdateAvatar = (avatar: string, type: string): AxiosRequestConfig => {
+  const formData = new FormData();
+  formData.append("avatar", avatar);
+  formData.append("type", type);
+  return {
+    url: "/profile/updateAvatar",
+    method: "POST",
+    data: formData
+  }
+}

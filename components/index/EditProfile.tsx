@@ -1,8 +1,6 @@
 import { Button, TextField } from "@mui/material";
-import OSS from 'ali-oss';
-import { AxiosResponse } from "axios";
 import { useFormik } from 'formik';
-import { ReactElement, useState, MouseEvent, FormEvent } from "react";
+import { ReactElement, useState, MouseEvent, FormEvent, ChangeEvent, useRef, DragEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { closeProfile } from "../../store/uiSlice";
@@ -10,13 +8,11 @@ import { updateAvatar, updateNickname, updateSignature } from "../../store/userS
 import styles from '../../styles/EditProfile.module.scss';
 import * as Yup from 'yup';
 import { useAxios } from '../../api/useAxios';
-import { reqUpdateNickname, reqUpdateSignature } from '../../api';
-import { Modal, Input, Space, message } from 'antd';
+import { reqUpdateAvatar, reqUpdateNickname, reqUpdateSignature } from '../../api';
+import { Modal, Input, Space, message, Avatar } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
-import Upload from "antd/es/upload/Upload";
-import { RcFile } from "antd/es/upload";
 
-const ModifyNickname = function ModifyNickname(): ReactElement {
+const ModifyNickname = (): ReactElement => {
   const request = useAxios()
   const dispatch = useDispatch()
   const nickname = useSelector((state: RootState) => state.user.nickname)
@@ -65,7 +61,7 @@ const ModifyNickname = function ModifyNickname(): ReactElement {
           fullWidth
           error={formik.errors.nickname ? true : false}
           helperText={formik.touched.nickname && formik.errors.nickname}
-          sx={{height: '80px'}}
+          sx={{ height: '80px' }}
         />
         <Button
           variant="contained"
@@ -78,7 +74,7 @@ const ModifyNickname = function ModifyNickname(): ReactElement {
   )
 }
 
-const ModifySignature = function ModifySignature(): ReactElement {
+const ModifySignature = (): ReactElement => {
   const dispatch = useDispatch()
   const request = useAxios()
   const signature = useSelector((state: RootState) => state.user.signature)
@@ -118,12 +114,13 @@ const ModifySignature = function ModifySignature(): ReactElement {
           type="text"
           name="signature"
           label="个性签名"
+          placeholder="输入您的新签名"
           value={formik.values.signature}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           helperText={formik.touched.signature && formik.errors.signature}
           error={formik.touched.signature && formik.errors.signature ? true : false}
-          sx={{height: '80px'}}></TextField>
+          sx={{ height: '80px' }}></TextField>
         <Button
           size="small"
           variant="contained"
@@ -133,59 +130,88 @@ const ModifySignature = function ModifySignature(): ReactElement {
     </div >
   )
 }
-
-const MofiyAvatar = function MofiyAvatar(): ReactElement {
-  const request = useAxios()
+const MofiyAvatar = (): ReactElement => {
+  const myAxios = useAxios()
   const dispatch = useDispatch()
-  const uploadImg = async (files: FileList) => {
-    const headers = {
-      'Cache-Control': 'no-cache'
-    }
-    let path = `${(new Date()).valueOf()}${files[0].name}`
-    const client = new OSS({
-      accessKeyId: process.env.NEXT_PUBLIC_ACCESS_KEY_ID,
-      accessKeySecret: process.env.NEXT_PUBLIC_ACCESS_KEY_SECRET,
-      bucket: process.env.NEXT_PUBLIC_BUCKET_NAME,
-      region: process.env.NEXT_PUBLIC_REGION
-    })
-    const result = await client.put(`img/${path}`, files[0], { headers })
-    if (result.res.status === 200) {
-      request.post('/profile/updateAvatar', {
-        avatar: path
-      })
-        .then((res: AxiosResponse) => {
-          if (res.data.code === 0) {
-            
-            dispatch(updateAvatar(`https://litaishuai.oss-cn-hangzhou.aliyuncs.com/img/${path}`))
-          } else if (res.data.code === 200) {
-          }
-        })
-        .catch((e: any) => {
-        })
+  const [loading, setLoading] = useState(false);
+  const [avatar, setAvatar] = useState<{ dataUrl: string, type: string }>({ dataUrl: "", type: "" });
+  const handleSubmit = async (event: MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    if (avatar.dataUrl.length === 0) {
+      message.error({ content: "请选择新的头像" });
     } else {
+      try {
+        setLoading(true);
+        const res = await myAxios(reqUpdateAvatar(avatar.dataUrl.replace(/^data:image\/\w+;base64,/, ""), avatar.type));
+        const data = await res.data;
+        if (data.code === 200) {
+          message.success({ content: "图片上传成功" });
+          dispatch(updateAvatar(data.data.avatar));
+        } else if (data.code === 500) {
+          message.error({ content: "图片上传失败" });
+        }
+      } catch (err) {
+
+      } finally {
+        setLoading(false);
+      }
     }
   }
-  const beforeUpload = (file: RcFile) => {
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-    if (!isJpgOrPng) {
-      message.error('You can only upload JPG/PNG file!');
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!/\bimage\/*/.exec(event.target?.files[0].type)) {
+      message.error({ content: "只能上传图片" });
+    } else {
+      const fileReader = new FileReader();
+      fileReader.onload = (e) => {
+        setAvatar({ dataUrl: e.target.result as string, type: event.target.files[0].type });
+        console.log(e.target.result);
+      }
+      fileReader.readAsDataURL(event.target.files[0]);
     }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      message.error('Image must smaller than 2MB!');
+  }
+  const handleDrop = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    const { dataTransfer } = event;
+    if (dataTransfer.files.length === 0) {
+      message.error({ content: "请选择文件" })
+    } else if (dataTransfer.files.length > 1) {
+      message.error({ content: "只能选择一个文件" });
+    } else {
+      let fileType = dataTransfer.files[0].type;
+      if (!/\bimage\/*/.exec(fileType)) {
+        message.error({ content: "只能上传图片" });
+      } else {
+        const fileReader = new FileReader();
+        fileReader.onload = (e) => {
+          setAvatar({ dataUrl: e.target.result as string, type: fileType });
+        }
+        fileReader.readAsDataURL(dataTransfer.files[0]);
+      }
     }
-    return isJpgOrPng && isLt2M;
-  };
+  }
   return (
-    <div className={styles.avatarContainer}>
-      <Upload name="avatar" showUploadList={false} beforeUpload={beforeUpload}>
-        {}
-      </Upload>
+    <div className={styles.uploadContainer}>
+      <label
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+      >
+        拖放至此，或者是点击都可以上传头像
+        <input id="avatar" hidden type="file" accept="image/*" name="avatar" onChange={handleChange} className={styles.dragContainer} />
+      </label>
+      {
+        avatar.dataUrl === null && <div></div>
+      }
+      {
+        avatar.dataUrl != null && <Avatar src={avatar.dataUrl} size={100} shape="square" />
+      }
+      <Button disabled={loading} onClick={handleSubmit} variant="contained">
+        {loading ? "提交中" : "提交"}
+      </Button>
     </div>
   )
 }
 
-const EditProfile = function FormDialog(): ReactElement {
+const EditProfile = (): ReactElement => {
   const toggle: boolean = useSelector((state: RootState): boolean => state.ui.toggleProfile)
   const username: string = useSelector((state: RootState): string => state.user.username)
   const dispatch = useDispatch();
