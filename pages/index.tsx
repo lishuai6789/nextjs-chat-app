@@ -5,7 +5,7 @@ import { Button, ButtonGroup, IconButton, Snackbar } from '@mui/material';
 import { InferGetServerSidePropsType } from 'next';
 import Head from "next/head";
 import nookies from 'nookies';
-import { memo, ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
 import SearchBar from '../components/index/SearchBar';
@@ -76,7 +76,6 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async (con
     }
   })
   const data = await res.json();
-  console.log(data);
   if (res.status === 401) {
     return {
       redirect: {

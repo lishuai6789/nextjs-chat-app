@@ -1,6 +1,6 @@
 import { Button, TextField } from "@mui/material";
 import { useFormik } from 'formik';
-import { ReactElement, useState, MouseEvent, FormEvent, ChangeEvent, useRef, DragEvent } from "react";
+import { ReactElement, useState, MouseEvent, FormEvent, ChangeEvent, DragEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { closeProfile } from "../../store/uiSlice";
@@ -158,6 +158,9 @@ const MofiyAvatar = (): ReactElement => {
     }
   }
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files.length === 0) {
+      return;
+    }
     if (!/\bimage\/*/.exec(event.target?.files[0].type)) {
       message.error({ content: "只能上传图片" });
     } else {
@@ -194,9 +197,10 @@ const MofiyAvatar = (): ReactElement => {
       <label
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
+        className={styles.dragContainer}
       >
         拖放至此，或者是点击都可以上传头像
-        <input id="avatar" hidden type="file" accept="image/*" name="avatar" onChange={handleChange} className={styles.dragContainer} />
+        <input id="avatar" hidden type="file" accept="image/*" name="avatar" onChange={handleChange} />
       </label>
       {
         avatar.dataUrl === null && <div></div>
