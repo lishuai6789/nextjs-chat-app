@@ -8,20 +8,13 @@ import nookies from 'nookies';
 import { ReactElement, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
-import SearchBar from '../components/index/SearchBar';
+import Friends from '../components/index/Friens';
 import UserInfo from '../components/index/UserInfo';
 import { RootState, wrapper } from '../store/store';
 import { closeAddFriend, closeNotLogin, closeProfile } from '../store/uiSlice';
 import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../store/userSlice";
 import styles from '../styles/index.module.scss';
 
-const FriendList = (): ReactElement => {
-  return (
-    <div className={styles.FriendList}>
-
-    </div>
-  )
-}
 const Bottom = (): ReactElement => {
   return (
     <div className={styles.Bottom}>
@@ -94,13 +87,13 @@ export const getServerSideProps = wrapper.getServerSideProps(store => async (con
   }
 })
 
-export default function Home(props: InferGetServerSidePropsType<typeof getServerSideProps>): ReactElement {
+export default function Home() {
+  // FIXME: 放在页面的顶级组件上，一定会有性能问题，况且还没有使用memo
   const username = useSelector((state: RootState) => state.user.username);
   const nickname: string = useSelector((state: RootState) => state.user.nickname);
   const signature: string = useSelector((state: RootState) => state.user.signature);
   const avatar: string = useSelector((state: RootState) => state.user.avatarUrl);
-  const toggleNotLogin = useSelector((state: RootState) => state.ui.toggleNotLoginWarm);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   useEffect(() => {
     dispatch(closeAddFriend())
     dispatch(closeNotLogin())
@@ -112,24 +105,23 @@ export default function Home(props: InferGetServerSidePropsType<typeof getServer
         <title>{username === '' ? '正在加载中' : username}</title>
       </Head>
       <aside className={styles.side}>
-        <section>
+        <header>
+          {/* FIXME: 此处将会产生性能问题 */}
           <UserInfo {...{ nickname, signature, avatar }} />
           <BasicMenu />
-        </section>
-        <SearchBar />
-        <FriendList />
-        <Bottom />
+        </header>
+        <main>
+          <Friends />
+        </main>
+        <footer>
+          <Bottom />
+        </footer>
       </aside>
       <main className={styles.main}>
         <MainHeader />
         <ChatArea />
         <InputChat />
       </main>
-      <Snackbar
-        open={toggleNotLogin}
-        autoHideDuration={6000}
-        message="您未登录"
-      />
     </div>
   )
 }

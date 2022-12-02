@@ -46,17 +46,18 @@ class ErrorBoundary extends React.Component<PropsType, StateType> {
     return this.props.children
   }
 }
-export const MessageContext = React.createContext<any>({});
 const MyApp: FC<AppProps> = ({ Component, ...rest }) => {
   const { store, props } = wrapper.useWrappedStore(rest);
-  return (<ErrorBoundary>
-    <Provider store={store}>
-      <Head>
-        <title>聊天室</title>
-      </Head>
-      <Component {...props.pageProps} />
-    </Provider>
-  </ErrorBoundary>
+
+  return (
+    <ErrorBoundary>
+      <Provider store={store}>
+        <Head>
+          <title>聊天室</title>
+        </Head>
+        <Component {...props.pageProps} />
+      </Provider>
+    </ErrorBoundary>
   )
 }
 export default MyApp;

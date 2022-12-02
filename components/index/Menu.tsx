@@ -1,5 +1,5 @@
 import { Button, Menu, MenuItem } from "@mui/material";
-import React, { Suspense, useId, memo } from "react";
+import React, { Suspense, useId } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
 import { RootState } from "../../store/store";

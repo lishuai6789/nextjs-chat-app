@@ -20,18 +20,22 @@
   height: calc(100vh - 40px);
   align-items: stretch;
 
-  section {
+  header {
+    flex: 0 0;
     display: grid;
     width: 100%;
     grid-template-columns: 8fr 1fr;
     border: solid 1px whitesmoke;
   }
-}
 
-.FriendList {
-  flex: 1 0;
-  border: solid 1px black;
-  background-color: white;
+  main {
+    flex: 1;
+  }
+
+  footer {
+    height: 100px;
+    flex: 0;
+  }
 }
 
 .Bottom {
