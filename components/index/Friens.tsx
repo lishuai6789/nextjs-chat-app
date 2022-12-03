@@ -50,12 +50,12 @@ const SearchBar = (): ReactElement => {
   )
 }
 const FriendsList = () => {
-  return (<div>
+  return (<div className={styles.FriendsList}>
 
   </div>)
 }
 const Friends = () => {
-  return (<div>
+  return (<div className={styles.container}>
     <SearchBar />
     <FriendsList />
   </div>)

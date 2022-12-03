@@ -9,7 +9,7 @@ import styles from '../../styles/EditProfile.module.scss';
 import * as Yup from 'yup';
 import { useAxios } from '../../api/useAxios';
 import { reqUpdateAvatar, reqUpdateNickname, reqUpdateSignature } from '../../api';
-import { Modal, Input, Space, message, Avatar } from 'antd';
+import { Modal, Input, Space, message, Avatar, Empty } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 
 const ModifyNickname = (): ReactElement => {
@@ -202,12 +202,16 @@ const MofiyAvatar = (): ReactElement => {
         拖放至此，或者是点击都可以上传头像
         <input id="avatar" hidden type="file" accept="image/*" name="avatar" onChange={handleChange} />
       </label>
-      {
-        avatar.dataUrl === null && <div></div>
-      }
-      {
-        avatar.dataUrl != null && <Avatar src={avatar.dataUrl} size={100} shape="square" />
-      }
+      <div className={styles.imgPreview}>
+        {
+          avatar.dataUrl === "" && <div>
+            <p>未选择任何图片</p>
+          </div>
+        }
+        {
+          avatar.dataUrl != "" && <Avatar src={avatar.dataUrl} size={100} shape="square" />
+        }
+      </div>
       <Button disabled={loading} onClick={handleSubmit} variant="contained">
         {loading ? "提交中" : "提交"}
       </Button>

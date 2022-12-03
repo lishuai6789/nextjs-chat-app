@@ -1,8 +1,7 @@
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
-import { Button, ButtonGroup, IconButton, Snackbar } from '@mui/material';
-import { InferGetServerSidePropsType } from 'next';
+import { Button, ButtonGroup, IconButton } from '@mui/material';
 import Head from "next/head";
 import nookies from 'nookies';
 import { ReactElement, useEffect } from 'react';

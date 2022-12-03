@@ -12,8 +12,9 @@
   align-items: center;
   height: 100px;
   display: grid;
-  grid-template-columns: 3fr 1fr 1fr;
+  grid-template-columns: 3fr 100px 1fr;
   width: 100%;
+  overflow: hidden;
 
   .dragContainer {
     display: block;
@@ -27,5 +28,9 @@
 
   .dragContainer:hover {
     border: solid 1px rgb(75, 75, 194);
+  }
+
+  .imgPreview {
+    height: 100%;
   }
 }
