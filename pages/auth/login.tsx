@@ -4,13 +4,13 @@ import { useFormik } from "formik"
 import Head from "next/head"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { ReactElement, useState } from "react"
+import { useState } from "react"
 import * as Yup from 'yup'
 import { reqLogin } from "../../api"
-import {useAxios} from "../../api/useAxios"
+import { useAxios } from "../../api/useAxios"
 import CopyRight from "../../components/CopyRight"
 import styles from '../../styles/login.module.scss'
-export default function Login(): ReactElement {
+export default function Login() {
   const router = useRouter()
   const myAxios = useAxios();
   const [messageApi, contextHolder] = message.useMessage();
@@ -37,10 +37,10 @@ export default function Login(): ReactElement {
       const data = await res.data;
       setLoading(false);
       if (data.code === 200) {
-        messageApi.success({content: "成功登录"});
+        messageApi.success({ content: "成功登录" });
         router.push("/");
       } else {
-        messageApi.error({content: "用户名或者密码错误，请重新输入"});
+        messageApi.error({ content: "用户名或者密码错误，请重新输入" });
       }
     }
   });

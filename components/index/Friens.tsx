@@ -1,12 +1,11 @@
 import { Button, TextField } from "@mui/material"
 import { AxiosError, AxiosResponse } from "axios"
 import { useFormik } from "formik"
-import { ReactElement } from "react"
 import { object, string } from 'yup'
 import styles from '../../styles/Friends.module.scss'
 import { useAxios } from "../../api/useAxios"
 
-const SearchBar = (): ReactElement => {
+const SearchBar = () => {
   const request = useAxios()
   const formik = useFormik({
     initialValues: {

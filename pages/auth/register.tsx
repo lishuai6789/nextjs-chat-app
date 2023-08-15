@@ -2,16 +2,15 @@ import { Button, TextField } from "@mui/material";
 import { useFormik } from "formik";
 import Head from "next/head";
 import Link from "next/link";
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import * as Yup from 'yup';
 import styles from '../../styles/register.module.scss';
-import { AxiosError, AxiosResponse } from "axios";
 import { useRouter } from "next/router";
 import CopyRight from "../../components/CopyRight";
 import { useAxios } from "../../api/useAxios";
 import { reqRegister } from "../../api";
 import { message } from "antd";
-const Register = function Register(): ReactElement {
+const Register = function Register() {
   const router = useRouter();
   const myAxios = useAxios();
   const [messageApi, contextHolder] = message.useMessage();

@@ -1,6 +1,4 @@
-import { ReactElement } from "react";
-
-export default function Footer():ReactElement {
+export default function Footer() {
   return (
     <div>
       <p>备案号：津ICP备2021008328号-1</p>

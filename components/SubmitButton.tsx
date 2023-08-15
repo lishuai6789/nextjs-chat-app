@@ -1,4 +1,4 @@
-import { memo, ReactElement, ReactNode, useReducer } from 'react'
+import { memo, ReactNode, useReducer } from 'react'
 import { LoadingButton } from '@mui/lab'
 import SendIcon from '@mui/icons-material/Send';
 import { AxiosResponse, AxiosError } from 'axios'
@@ -37,7 +37,7 @@ function reducer(state: StateType, action: ActionType) {
       throw new Error("wrong action type");
   }
 }
-function SubmitButton({ children, color = "primary", size = "medium", variant = "text", submit, args }: PropsType): ReactElement {
+function SubmitButton({ children, color = "primary", size = "medium", variant = "text", submit, args }: PropsType) {
   const init: StateType = { loading: false, color: color }
   const [state, dispatch] = useReducer(reducer, init)
   const handleClick = () => {

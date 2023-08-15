@@ -4,7 +4,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { Button, ButtonGroup, IconButton } from '@mui/material';
 import Head from "next/head";
 import nookies from 'nookies';
-import { ReactElement, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import BasicMenu from '../components/index/Menu';
 import Friends from '../components/index/Friens';
@@ -14,7 +14,7 @@ import { closeAddFriend, closeNotLogin, closeProfile } from '../store/uiSlice';
 import { updateAvatar, updateNickname, updateSignature, updateUsername } from "../store/userSlice";
 import styles from '../styles/index.module.scss';
 
-const Bottom = (): ReactElement => {
+const Bottom = () => {
   return (
     <div className={styles.Bottom}>
       <Button variant='contained'>词云</Button>
@@ -22,7 +22,7 @@ const Bottom = (): ReactElement => {
     </div>
   )
 }
-const MainHeader = (): ReactElement => {
+const MainHeader = () => {
   return (
     <div className={styles.MainHeader}>
       <div>
@@ -34,14 +34,14 @@ const MainHeader = (): ReactElement => {
     </div>
   )
 }
-const ChatArea = (): ReactElement => {
+const ChatArea = () => {
   return (
     <div className={styles.ChatArea}>
 
     </div>
   )
 }
-const InputChat = (): ReactElement => {
+const InputChat = () => {
   return (
     <div className={styles.InputChat}>
       <div className={styles.menu}>

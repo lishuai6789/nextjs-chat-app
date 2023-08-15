@@ -1,6 +1,6 @@
 import { LoadingButton } from "@mui/lab";
 import { AxiosError, AxiosResponse } from "axios";
-import { ReactNode, useState, ReactElement } from 'react'
+import { ReactNode, useState } from 'react'
 interface PropType {
   children: ReactNode;
   submit: () => any;
@@ -8,10 +8,11 @@ interface PropType {
   type?: "submit" | "button"
 };
 
-export default function MyLoadingButton({children, submit, variant = "text", type="button"}: PropType): ReactElement {
-  const [buttonState, setButtonState] = useState<{ 
-    loading: boolean, 
-    color: "primary" | "success" | "error" }>({ loading: false, color: "primary" })
+export default function MyLoadingButton({ children, submit, variant = "text", type = "button" }: PropType) {
+  const [buttonState, setButtonState] = useState<{
+    loading: boolean,
+    color: "primary" | "success" | "error"
+  }>({ loading: false, color: "primary" })
   const handleClick = () => {
     setButtonState({ loading: true, color: "primary" })
     submit()

@@ -1,6 +1,6 @@
 import { Button, TextField } from "@mui/material";
 import { useFormik } from 'formik';
-import { ReactElement, useState, MouseEvent, FormEvent, ChangeEvent, DragEvent } from "react";
+import { useState, MouseEvent, FormEvent, ChangeEvent, DragEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { closeProfile } from "../../store/uiSlice";
@@ -9,10 +9,10 @@ import styles from '../../styles/EditProfile.module.scss';
 import * as Yup from 'yup';
 import { useAxios } from '../../api/useAxios';
 import { reqUpdateAvatar, reqUpdateNickname, reqUpdateSignature } from '../../api';
-import { Modal, Input, Space, message, Avatar, Empty } from 'antd';
+import { Modal, Input, Space, message, Avatar } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 
-const ModifyNickname = (): ReactElement => {
+const ModifyNickname = () => {
   const request = useAxios()
   const dispatch = useDispatch()
   const nickname = useSelector((state: RootState) => state.user.nickname)
@@ -74,7 +74,7 @@ const ModifyNickname = (): ReactElement => {
   )
 }
 
-const ModifySignature = (): ReactElement => {
+const ModifySignature = () => {
   const dispatch = useDispatch()
   const request = useAxios()
   const signature = useSelector((state: RootState) => state.user.signature)
@@ -130,7 +130,7 @@ const ModifySignature = (): ReactElement => {
     </div >
   )
 }
-const MofiyAvatar = (): ReactElement => {
+const MofiyAvatar = () => {
   const myAxios = useAxios()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(false);
@@ -219,7 +219,7 @@ const MofiyAvatar = (): ReactElement => {
   )
 }
 
-const EditProfile = (): ReactElement => {
+const EditProfile = () => {
   const toggle: boolean = useSelector((state: RootState): boolean => state.ui.toggleProfile)
   const username: string = useSelector((state: RootState): string => state.user.username)
   const dispatch = useDispatch();

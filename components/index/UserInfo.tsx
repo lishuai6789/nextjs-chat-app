@@ -1,12 +1,12 @@
 import { Typography } from "@mui/material";
-import { memo, ReactElement } from "react";
+import { memo } from "react";
 import styles from '../../styles/UserInfo.module.scss';
 export interface UserInfoProps {
   nickname: string;
   signature: string;
   avatar: string;
 }
-const UserInfo = memo(function UserInfo({ nickname, signature, avatar }: UserInfoProps): ReactElement {
+const UserInfo = memo(function UserInfo({ nickname, signature, avatar }: UserInfoProps) {
   return (
     <div className={styles.UserInfo}>
       <div className={styles.avatarWrapper}>
